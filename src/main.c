@@ -204,62 +204,121 @@ void readTree(vquadTreeNode * vector, quadTreeNode ** nodes, int index) {
 
 
 }
+/*
+ *	Computes *.ppm file based on
+ *	the rgb matrix
+ */
+
+void writePPM(rgb ** mat, int rows, int cols, char * filename) {
+    FILE *fp;
+    int i, j;
+
+    fp = fopen(filename, "wb");
+    fprintf(fp, "P6\n");
+    fprintf(fp, "%d %d\n", cols, rows);
+    fprintf(fp, "255\n");
+
+    for (i = 0; i < rows; i++) {
+        for (j = 0; j < cols; j++) {
+            fwrite(&mat[i][j], sizeof(rgb), 1, fp);
+        }
+    }
+    fclose(fp);
+}
+
 
 int main(int argc, char *argv[]) {
-    if (argc != 4) {
-        fprintf(stderr, "Usage: %s <input_file> <threshold> <output_file>\n", argv[0]);
-        return 1;
-    }
 
 
-    unsigned int index = 0;
-    unsigned int i;
-    int threshold = atoi(argv[2]);
-    int rows, cols;
-
-    rgb **mat;
-    quadTreeNode *root = NULL;
-    
-    mat = readFile(&rows, &cols, argv[1]);
-    compress(mat, &root, 0, 0, min(rows, cols), threshold);
-
-    // vector of pointers to the tree nodes
-    quadTreeNode ** nodes = malloc(sizeof(quadTreeNode*));
-    traverse(root, &nodes, &index);
-
-    vquadTreeNode * vector = malloc(sizeof(vquadTreeNode) * index);
-    computeVector(nodes, &vector, index);
-
-    for (i = 0; i < index; i++) {
-        free(nodes[i]);
-    }
-    free(nodes);
-
-    // write vector to file
-    FILE * output = fopen(argv[3], "wb");
-
-    unsigned int count = 0;
-    for (i = 0; i < index; i++) {
-        if (vector[i].topLeft == -1) {
-            count++;
+    // into binary format
+    if (strcmp(argv[4], "binary") == 0) {
+        unsigned int index = 0;
+        unsigned int i;
+        int threshold = atoi(argv[2]);
+        int rows, cols;
+        
+        rgb **mat;
+        quadTreeNode *root = NULL;
+        
+        mat = readFile(&rows, &cols, argv[1]);
+        compress(mat, &root, 0, 0, min(rows, cols), threshold);
+        
+        // vector of pointers to the tree nodes
+        quadTreeNode ** nodes = malloc(sizeof(quadTreeNode*));
+        traverse(root, &nodes, &index);
+        
+        vquadTreeNode * vector = malloc(sizeof(vquadTreeNode) * index);
+        computeVector(nodes, &vector, index);
+        
+        for (i = 0; i < index; i++) {
+            free(nodes[i]);
         }
-    }
-    fwrite(&count, sizeof(int), 1, output);
-    fwrite(&index, sizeof(int), 1, output);
-
-    for (i = 0; i < index; i++) {
-        fwrite(&vector[i], sizeof(vquadTreeNode), 1, output);
-        if (vector[i].topLeft == -1) {
-            count++;
+        free(nodes);
+        
+        // write vector to file
+        FILE * output = fopen(argv[3], "wb");
+        
+        unsigned int count = 0;
+        for (i = 0; i < index; i++) {
+            if (vector[i].topLeft == -1) {
+                count++;
+            }
         }
+        fwrite(&count, sizeof(int), 1, output);
+        fwrite(&index, sizeof(int), 1, output);
+
+        for (i = 0; i < index; i++) {
+            fwrite(&vector[i], sizeof(vquadTreeNode), 1, output);
+            if (vector[i].topLeft == -1) {
+                count++;
+            }
+        }
+        
+        free(vector);
+        for (i = 0; i < rows; i++) {
+            free(mat[i]);
+        }
+        free(mat);
+        fclose(output);
+        
+        return 0;
     }
 
-    free(vector);
-    for (i = 0; i < rows; i++) {
-        free(mat[i]);
-    }
-    free(mat);
-    fclose(output);
+    // into image format
+    else if (strcmp(argv[4], "image") == 0) {
+        unsigned int i;
+        int threshold = atoi(argv[2]);
+        int rows, cols;
+        rgb **mat;
+        quadTreeNode *root = NULL;
 
-    return 0;
+        mat = readFile(&rows, &cols, argv[1]);
+        compress(mat, &root, 0, 0, min(rows, cols), threshold);
+
+        // alloc rgb matrix
+        rgb **output = malloc(sizeof(rgb *) * rows);
+        for (i = 0; i < rows; i++) {
+            output[i] = malloc(sizeof(rgb) * cols);
+        }
+
+        // fill the matrix
+        for (i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                output[i][j] = root->color;
+            }
+        }
+
+        // write matrix to file
+        writePPM(output, rows, cols, argv[3]);
+
+        for (i = 0; i < rows; i++) {
+            free(output[i]);
+        }
+        free(output);
+        for (i = 0; i < rows; i++) {
+            free(mat[i]);
+        }
+        free(mat);
+        return 0;
+    }
 }
