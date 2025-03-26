@@ -50,3 +50,7 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+src/quadtree.c
+src/test1.png
+.vscode/
