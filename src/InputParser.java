@@ -7,17 +7,20 @@ import javax.imageio.ImageIO;
 public class InputParser {
     private RGBMatrix rgbMatrix;
     private int height, width;
+    private String outputFileName;
 
     public InputParser() {}
 
     public void parseInput() throws IOException {
-        Scanner scanner = new Scanner(System.in);
-        try {
+        try (Scanner scanner = new Scanner(System.in)) {
             String currentDir = System.getProperty("user.dir");
             String testPath = currentDir.substring(0, currentDir.lastIndexOf(File.separator)) + File.separator + "test" + File.separator + "tc";
+
             System.out.println("Masukkan nama file: ");
             String fileName = scanner.nextLine();
             String filePath = testPath + File.separator + fileName;
+            System.out.println("Masukkan nama file output: ");
+            this.outputFileName = scanner.nextLine();
 
             System.out.println("[DEBUG] Memulai proses pembacaan gambar");
             System.out.println("[DEBUG] Path gambar: " + filePath);
@@ -36,13 +39,10 @@ public class InputParser {
             System.out.println("[DEBUG] Objek RGBMatrix dibuat dengan dimensi: " + width + " x " + height);
 
             // Konversi gambar ke matriks RGB
-            for (int y = 0; y < height; y++) {
-                for (int x = 0; x < width; x++) {
-                    rgbMatrix.setPixel(x, y, image.getRGB(x, y));
-                }
+            int[] rgbArray = image.getRGB(0, 0, width, height, null, 0, width);
+            for (int i = 0; i < rgbArray.length; i++) {
+                rgbMatrix.setPixel(i % width, i / width, rgbArray[i]);
             }
-        } finally {
-            scanner.close();
         }
     }
 
@@ -56,6 +56,10 @@ public class InputParser {
 
     public RGBMatrix getRGBMatrix() {
         return rgbMatrix;
+    }
+
+    public String getOutputFileName() {
+        return outputFileName;
     }
 }
 
