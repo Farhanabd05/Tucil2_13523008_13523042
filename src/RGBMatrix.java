@@ -14,20 +14,26 @@ public class RGBMatrix {
         System.out.println("RGBMatrix created with width=" + width + " and height=" + height);
     }
 
-    public void setPixel(int x, int y, int r, int g, int b) {
-        if (x < 0 || x >= width || y < 0 || y >= height) {
-            System.err.println("ERROR: Posisi pixel (" + x + ", " + y + ") di luar batas.");
-            return;
+    public void setPixel(int x, int y, int pixel) {
+        if (isOutOfBounds(x, y)) {
+            throw new IllegalArgumentException("ERROR: Posisi pixel (" + x + ", " + y + ") di luar batas.");
         }
-        matrix[y][x].setR(r);
-        matrix[y][x].setG(g);
-        matrix[y][x].setB(b);
+        matrix[y][x].setRGB(pixel);
+    }
+
+    // ini untuk print sebagian saja buat debugging tipis2 ngeck warnanya bener atau kgk
+    public void printRGB() {
+        for (int y = 0; y < 3; y++) {
+            for (int x = 0; x < 3; x++) {
+                System.out.println("DEBUG: Pixel di (" + x + ", " + y + ") = (" 
+                + matrix[x][y].getR() + ", " + matrix[x][y].getG() + ", " + matrix[x][y].getB() + ")");
+            }
+        }
     }
 
     public Pixel getPixel(int x, int y) {
-        if (x < 0 || x >= width || y < 0 || y >= height) {
-            System.err.println("ERROR: Posisi pixel (" + x + ", " + y + ") di luar batas.");
-            return null;
+        if (isOutOfBounds(x, y)) {
+            throw new IllegalArgumentException("ERROR: Posisi pixel (" + x + ", " + y + ") di luar batas.");
         }
         return matrix[y][x];
     }
@@ -40,15 +46,9 @@ public class RGBMatrix {
         return height;
     }
 
-    // Fungsi ini dapat digunakan untuk mencetak seluruh matriks RGB (untuk gambar kecil)
-    public void printMatrix() {
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                System.out.print(getPixel(x, y) + " ");
-            }
-            System.out.println();
-        }
+    private boolean isOutOfBounds(int x, int y) {
+        return x < 0 || x >= width || y < 0 || y >= height;
     }
-
-
 }
+
+
