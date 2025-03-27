@@ -4,9 +4,9 @@ public class QuadTreeNode {
     private double error;
     private QuadTreeNode[] children;
     private boolean isLeaf;
-    private String errorMethod;
+    private int errorMethod;
 
-    public QuadTreeNode(int x, int y, int width, int height, Pixel avgColor, double error, String errorMethod) {
+    public QuadTreeNode(int x, int y, int width, int height, Pixel avgColor, double error, int errorMethod) {
         this.x = x;
         this.y = y;
         this.width = width;
@@ -28,16 +28,16 @@ public class QuadTreeNode {
 
         children[0] = createChild(mat, x,               y,              halfWidth,   halfHeight, errorMethod);
         children[1] = createChild(mat, x + halfWidth,   y,              halfWidth,   halfHeight, errorMethod);
-        children[2] = createChild(mat, x,               y + halfHeight, halfWidth, halfHeight, errorMethod);
-        children[3] = createChild(mat, x + halfWidth,   y + halfHeight, halfWidth, halfHeight, errorMethod);
+        children[2] = createChild(mat, x,               y + halfHeight, halfWidth,   halfHeight, errorMethod);
+        children[3] = createChild(mat, x + halfWidth,   y + halfHeight, halfWidth,   halfHeight, errorMethod);
         isLeaf = false;
 
         for (QuadTreeNode child : children) {
-            child.split(mat, threshold, minBlockSize);
+            child.split(mat, threshold, minBlockSize);  
         }
     }
 
-    private QuadTreeNode createChild(RGBMatrix mat, int x, int y, int w, int h, String errorMethod) {
+    private QuadTreeNode createChild(RGBMatrix mat, int x, int y, int w, int h, int errorMethod) {
         Pixel avgColor = mat.getAverageColor(x, y, w, h);
         double error = mat.getError(x, y, w, h, avgColor, errorMethod);
         return new QuadTreeNode(x, y, w, h, avgColor, error, errorMethod);

@@ -118,12 +118,12 @@ public class RGBMatrix {
         for (int i = 0; i < w * h; i++) {
             Pixel col = pixels[offset + i];
             int r = col.getR(), g = col.getG(), b = col.getB();
-            if (r > maxR) maxR = r;
-            if (g > maxG) maxG = g;
-            if (b > maxB) maxB = b;
-            if (r < minR) minR = r;
-            if (g < minG) minG = g;
-            if (b < minB) minB = b;
+            maxR = Math.max(maxR, r);
+            maxG = Math.max(maxG, g);
+            maxB = Math.max(maxB, b);
+            minR = Math.min(minR, r);
+            minG = Math.min(minG, g);
+            minB = Math.min(minB, b);
         }
         return ((maxR - minR) + (maxG - minG) + (maxB - minB)) / 3.0;
     }
@@ -150,12 +150,12 @@ public class RGBMatrix {
         return (entropyR + entropyG + entropyB) / 3;
     }
 
-    public double getError(int x, int y, int w, int h, Pixel avgColor, String errorMethod) {
+    public double getError(int x, int y, int w, int h, Pixel avgColor, int errorMethod) {
         switch (errorMethod) {
-            case "variance": return getVarianceError(x, y, w, h, avgColor);
-            case "max pixel difference": return getErrorMaxPixelDifference(x, y, w, h, avgColor);
-            case "entropy": return getEntropyError(x, y, w, h);
-            case "max pixel diff": return getMaxPixelDiffError(x, y, w, h);
+            case 1: return getVarianceError(x, y, w, h, avgColor);
+            case 2: return getErrorMaxPixelDifference(x, y, w, h, avgColor);
+            case 3: return getEntropyError(x, y, w, h);
+            case 4: return getMaxPixelDiffError(x, y, w, h);
             default: return 0;
         }
     }
