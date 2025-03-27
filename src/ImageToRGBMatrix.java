@@ -2,21 +2,29 @@ import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
+import java.util.Scanner;
 
 public class ImageToRGBMatrix {
     public static void  main(String[] args) {
-        String imagePath = "C:\\Users\\DELL\\Documents\\1.IF_ITB\\1_SEM4\\STIMA\\TUBES2\\Tucil2_13523008_13523042\\src\\testimage.jpg";
+        
+        String currentDir = System.getProperty("user.dir");
+        String testPath = currentDir.substring(0, currentDir.lastIndexOf(File.separator)) + File.separator + "test" + File.separator + "tc"; 
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Masukkan nama file: ");
+        String fileName = scanner.nextLine();
+        String filePath = testPath + File.separator + fileName;
         if (args.length > 0) {
-            imagePath = args[0];
+            filePath = args[0];
         }
 
         System.out.println("[DEBUG] Memulai proses pembacaan gambar");
-        System.out.println("[DEBUG] Path gambar: " + imagePath);
+        System.out.println("[DEBUG] Path gambar: " + filePath);
 
         try {
-            BufferedImage image = ImageIO.read(new File(imagePath));
+            BufferedImage image = ImageIO.read(new File(filePath));
             if (image == null) {
                 System.err.println("[ERROR] GAGAL membaca file image, pastikan file tersebut benar dan didudkung");
+                scanner.close();
                 return;
             }
             System.out.println("[DEBUG Gambar berhasil dimuat");
@@ -50,6 +58,7 @@ public class ImageToRGBMatrix {
             System.err.println("ERROR: Terjadi kesalahan saat membaca file gambar: " + e.getMessage());
             e.printStackTrace();
         }
+        scanner.close();
     }
 }
 /*
