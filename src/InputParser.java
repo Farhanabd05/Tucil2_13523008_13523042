@@ -8,6 +8,10 @@ public class InputParser {
     private RGBMatrix rgbMatrix;
     private int height, width;
     private String outputFileName;
+    private int errorMethod;
+    private double threshold;
+    private int minBlockSize;
+    private boolean showAvgColors;
 
     public InputParser() {}
 
@@ -21,6 +25,19 @@ public class InputParser {
             String filePath = testPath + File.separator + fileName;
             System.out.println("Masukkan nama file output: ");
             this.outputFileName = scanner.nextLine();
+
+            // Create quadtree root node
+            System.out.println("Masukkan metode error (1: Variance, 2: MaxPixelDifference, 3: Entropy, 4: MaxPixelDiff): ");
+            this.errorMethod = Integer.parseInt(scanner.nextLine());
+            
+            System.out.println("Masukkan threshold error: ");
+            this.threshold = Double.parseDouble(scanner.nextLine());
+            
+            System.out.println("Masukkan ukuran minimal blok: ");
+            this.minBlockSize = Integer.parseInt(scanner.nextLine());
+
+            System.out.println("Tampilkan warna rata-rata di setiap node? (y/n): ");
+            this.showAvgColors = scanner.nextLine().toLowerCase().equals("y");
 
             System.out.println("[DEBUG] Memulai proses pembacaan gambar");
             System.out.println("[DEBUG] Path gambar: " + filePath);
@@ -60,6 +77,22 @@ public class InputParser {
 
     public String getOutputFileName() {
         return outputFileName;
+    }
+
+    public int getErrorMethod() {
+        return errorMethod;
+    }
+
+    public double getThreshold() {
+        return threshold;
+    }
+
+    public int getMinBlockSize() {
+        return minBlockSize;
+    }
+
+    public boolean getShowAvgColors() {
+        return showAvgColors;
     }
 }
 

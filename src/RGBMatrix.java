@@ -100,18 +100,6 @@ public class RGBMatrix {
         return totalError / (w * h);
     }
 
-    public double getErrorMaxPixelDifference (int x, int y, int w, int h, Pixel avgColor) {
-        int maxError = 0;
-        int offset = y * width + x;
-        for (int i = 0; i < w * h; i++) {
-            Pixel color = pixels[offset + i];
-            maxError = Math.max(maxError, Math.abs(color.getR() - avgColor.getR()));
-            maxError = Math.max(maxError, Math.abs(color.getG() - avgColor.getG()));
-            maxError = Math.max(maxError, Math.abs(color.getB() - avgColor.getB()));
-        }
-        return maxError;
-    }
-
     public double getMaxPixelDiffError(int x, int y, int w, int h) {
         int maxR = 0, maxG = 0, maxB = 0, minR = 255, minG = 255, minB = 255;
         int offset = y * width + x;
@@ -153,7 +141,7 @@ public class RGBMatrix {
     public double getError(int x, int y, int w, int h, Pixel avgColor, int errorMethod) {
         switch (errorMethod) {
             case 1: return getVarianceError(x, y, w, h, avgColor);
-            case 2: return getErrorMaxPixelDifference(x, y, w, h, avgColor);
+            case 2: return getMADError(x, y, w, h, avgColor);
             case 3: return getEntropyError(x, y, w, h);
             case 4: return getMaxPixelDiffError(x, y, w, h);
             default: return 0;

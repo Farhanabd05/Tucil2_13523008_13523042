@@ -18,11 +18,18 @@ public class QuadTreeNode {
     }
 
     public void split(RGBMatrix mat, double threshold, int minBlockSize) {
-        if (width <= minBlockSize || height <= minBlockSize || error < threshold) {
-            System.out.println("block tidak dapat dibagia lagi: (" + x + ", " + y + ")"+ " dimensi: " + width + " x " + height + " error: " + error);
+        if (width <= minBlockSize || height <= minBlockSize) {
+            // System.out.println("[DEBUG] Sudah leaf");
             return;
         }
 
+        this.error = mat.getError(x, y, width, height, avgColor, errorMethod);
+        if (error < threshold) {
+            // System.out.println("[DEBUG] Error below threshold");
+            return;
+        }
+
+        // System.out.println("[DEBUG] Splitting node at (" + x + "," + y + ") with size " + width + "x" + height + ", error: " + error);
         int halfWidth = width / 2;
         int halfHeight = height / 2;
 
@@ -42,4 +49,37 @@ public class QuadTreeNode {
         double error = mat.getError(x, y, w, h, avgColor, errorMethod);
         return new QuadTreeNode(x, y, w, h, avgColor, error, errorMethod);
     }
+
+
+    public boolean isLeaf() {
+        return isLeaf;
+    }
+    public int getX() {
+        return x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public Pixel getAvgColor() {
+        return avgColor;
+    }
+
+    public double getError() {
+        return error;    
+    }
+
+    public QuadTreeNode[] getChildren() {
+        return children;
+    }
 }
+
