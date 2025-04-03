@@ -110,5 +110,5 @@ public class Compressor {
 cd ..
 javac -d ./bin/ ./src/*.java
 cd bin
-java Compressor 1 15.0 4 "alone.jpg" "aloneout.jpg"
+java Compressor 2 15.0 50 "alone.jpg" "aloneout.jpg"
 */

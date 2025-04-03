@@ -66,7 +66,7 @@ public class QuadTreeNode {
                 varR += Math.pow(col.getRed() - avgR, 2);
                 varG += Math.pow(col.getGreen() - avgG, 2);
                 varB += Math.pow(col.getBlue() - avgB, 2);
-                if (col.getRed() > 0 || col.getGreen() > 0 || col.getBlue() > 0) total++;
+                total++;
             }
         }
         return (varR / total + varG / total + varB / total) / 3;
@@ -83,8 +83,7 @@ public class QuadTreeNode {
                 madR += Math.abs(col.getRed() - avgR);
                 madG += Math.abs(col.getGreen() - avgG);
                 madB += Math.abs(col.getBlue() - avgB);
-                if (col.getRed() > 0 || col.getGreen() > 0 || col.getBlue() > 0) total++;
-
+                total++;
             }
         }
         return (madR / total + madG / total + madB / total) / 3;
@@ -140,7 +139,6 @@ public class QuadTreeNode {
                 sumR += col.getRed();
                 sumG += col.getGreen();
                 sumB += col.getBlue();
-                if (col.getRed() > 0 || col.getGreen() > 0 || col.getBlue() > 0) total++;
             }
         }
         return new Color((int)(sumR / total), (int)(sumG / total), (int)(sumB / total));
