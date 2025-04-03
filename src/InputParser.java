@@ -1,61 +1,45 @@
-import java.io.File;
-import java.io.IOException;
-import java.util.Scanner;
-import java.awt.image.BufferedImage;
-import javax.imageio.ImageIO;
-
 public class InputParser {
-    private RGBMatrix rgbMatrix;
-    private int height, width;
-
-    public InputParser() {}
-
-    public void parseInput() throws IOException {
-        Scanner scanner = new Scanner(System.in);
-        try {
-            String currentDir = System.getProperty("user.dir");
-            String testPath = currentDir.substring(0, currentDir.lastIndexOf(File.separator)) + File.separator + "test" + File.separator + "tc";
-            System.out.println("Masukkan nama file: ");
-            String fileName = scanner.nextLine();
-            String filePath = testPath + File.separator + fileName;
-
-            System.out.println("[DEBUG] Memulai proses pembacaan gambar");
-            System.out.println("[DEBUG] Path gambar: " + filePath);
-
-            BufferedImage image = ImageIO.read(new File(filePath));
-            if (image == null) {
-                throw new IOException("[ERROR] GAGAL membaca file image, pastikan file tersebut benar dan didukung");
+    public static int parseErrorMethod(String[] args) {
+        if (args.length > 0) {
+            try {
+                return Integer.parseInt(args[0]);
+            } catch (NumberFormatException e) {
+                // gunakan nilai default
+                return 1;
             }
-
-            System.out.println("[DEBUG] Gambar berhasil dimuat");
-            this.width = image.getWidth();
-            this.height = image.getHeight();
-            System.out.println("[DEBUG] Dimensi Gambar: " + width + " x " + height);
-
-            this.rgbMatrix = new RGBMatrix(width, height);
-            System.out.println("[DEBUG] Objek RGBMatrix dibuat dengan dimensi: " + width + " x " + height);
-
-            // Konversi gambar ke matriks RGB
-            for (int y = 0; y < height; y++) {
-                for (int x = 0; x < width; x++) {
-                    rgbMatrix.setPixel(x, y, image.getRGB(x, y));
-                }
-            }
-        } finally {
-            scanner.close();
         }
+        return 1;
     }
 
-    public int getHeight() {
-        return height;
+    public static double parseThreshold(String[] args) {
+        if (args.length > 1) {
+            try {
+                return Double.parseDouble(args[1]);
+            } catch (NumberFormatException e) {}
+        }
+        return 15.0;
     }
 
-    public int getWidth() {
-        return width;
+    public static int parseMinBlockSize(String[] args) {
+        if (args.length > 2) {
+            try {
+                return Integer.parseInt(args[2]);
+            } catch (NumberFormatException e) {}
+        }
+        return 4;
     }
 
-    public RGBMatrix getRGBMatrix() {
-        return rgbMatrix;
+    public static String parseInputImagePath(String[] args) {
+        if (args.length > 3) {
+            return args[3];
+        }
+        return "alone.jpg";
+    }
+
+    public static String parseOutputImagePath(String[] args) {
+        if (args.length > 4) {
+            return args[4];
+        }
+        return "aloneout.jpg";
     }
 }
-
