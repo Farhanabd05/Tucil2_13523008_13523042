@@ -107,6 +107,8 @@ public class Compressor {
 }
 
 /*
-
-java Compressor 1 15.0 4 "C:\Users\HP 14s\Documents\1_FARHAN\STIMA\TUCIL2\Tucil2_13523008_13523042\test\tc\alone.jpg" "C:\Users\HP 14s\Documents\1_FARHAN\STIMA\TUCIL2\Tucil2_13523008_13523042\test\sol\aloneout.jpg"
+cd ..
+javac -d ./bin/ ./src/*.java
+cd bin
+java Compressor 1 15.0 4 "alone.jpg" "aloneout.jpg"
 */

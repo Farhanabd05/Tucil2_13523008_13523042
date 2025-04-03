@@ -1,3 +1,5 @@
+import java.io.File;
+
 public class InputParser {
     public static int parseErrorMethod(String[] args) {
         if (args.length > 0) {
@@ -30,16 +32,16 @@ public class InputParser {
     }
 
     public static String parseInputImagePath(String[] args) {
-        if (args.length > 3) {
-            return args[3];
-        }
-        return "alone.jpg";
+        String currentDir = System.getProperty("user.dir");
+        String testPath = currentDir.substring(0, currentDir.lastIndexOf(File.separator)) + File.separator + "test" + File.separator + "tc";
+        String fileName = args.length > 3 ? args[3] : "alone.jpg";
+        return testPath + File.separator + fileName;
     }
 
     public static String parseOutputImagePath(String[] args) {
-        if (args.length > 4) {
-            return args[4];
-        }
-        return "aloneout.jpg";
+        String currentDir = System.getProperty("user.dir");
+        String testPath = currentDir.substring(0, currentDir.lastIndexOf(File.separator)) + File.separator + "test" + File.separator + "sol";
+        String fileName = args.length > 3 ? args[4] : "alone.jpg";
+        return testPath + File.separator + fileName;
     }
 }
