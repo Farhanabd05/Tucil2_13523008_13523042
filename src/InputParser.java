@@ -1,5 +1,7 @@
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
@@ -7,11 +9,12 @@ import javax.imageio.ImageIO;
 public class InputParser {
     private RGBMatrix rgbMatrix;
     private int height, width;
-    private String outputFileName;
-    private int errorMethod;
+    private String outputPath;
+    private ErrorMetric errorMetric;
     private double threshold;
     private int minBlockSize;
-    private boolean showAvgColors;
+    private File inputFile;
+    private String gifPath;
 
     public InputParser() {}
 
@@ -19,30 +22,16 @@ public class InputParser {
         try (Scanner scanner = new Scanner(System.in)) {
             String currentDir = System.getProperty("user.dir");
             String testPath = currentDir.substring(0, currentDir.lastIndexOf(File.separator)) + File.separator + "test" + File.separator + "tc";
+            String solPath = currentDir.substring(0, currentDir.lastIndexOf(File.separator)) + File.separator + "test" + File.separator + "sol";
 
             System.out.println("Masukkan nama file: ");
-            String fileName = scanner.nextLine();
-            String filePath = testPath + File.separator + fileName;
+            String inputfileName = scanner.nextLine();
+            String inputFilePath = testPath + File.separator + inputfileName;
             System.out.println("Masukkan nama file output: ");
-            this.outputFileName = scanner.nextLine();
+            String outputFileName = scanner.nextLine();
+            this.outputPath = solPath + File.separator + outputFileName;
 
-            // Create quadtree root node
-            System.out.println("Masukkan metode error (1: Variance, 2: MaxPixelDifference, 3: Entropy, 4: MaxPixelDiff): ");
-            this.errorMethod = Integer.parseInt(scanner.nextLine());
-            
-            System.out.println("Masukkan threshold error: ");
-            this.threshold = Double.parseDouble(scanner.nextLine());
-            
-            System.out.println("Masukkan ukuran minimal blok: ");
-            this.minBlockSize = Integer.parseInt(scanner.nextLine());
-
-            System.out.println("Tampilkan warna rata-rata di setiap node? (y/n): ");
-            this.showAvgColors = scanner.nextLine().toLowerCase().equals("y");
-
-            System.out.println("[DEBUG] Memulai proses pembacaan gambar");
-            System.out.println("[DEBUG] Path gambar: " + filePath);
-
-            BufferedImage image = ImageIO.read(new File(filePath));
+            BufferedImage image = ImageIO.read(new File(inputFilePath));
             if (image == null) {
                 throw new IOException("[ERROR] GAGAL membaca file image, pastikan file tersebut benar dan didukung");
             }
@@ -60,8 +49,29 @@ public class InputParser {
             for (int i = 0; i < rgbArray.length; i++) {
                 rgbMatrix.setPixel(i % width, i / width, rgbArray[i]);
             }
+
+            // 2. Choose error metric
+            displayErrorMetrics();
+            int errorMetricChoice = scanner.nextInt();
+            errorMetric = ErrorMetricFactory.createErrorMetric(errorMetricChoice);
+
+            // 3. Error threshold
+            System.out.print("\nEnter error threshold value: ");
+            threshold = scanner.nextDouble();
+
+            // 4. Minimum block size
+            System.out.print("\nEnter minimum block size (e.g., 4): ");
+            minBlockSize = scanner.nextInt();
+            scanner.nextLine(); // Consume newline
+
+            this.inputFile = new File(inputFilePath);
+            
+            System.out.println("\n Enter gif path : ");
+            String gifFileName= scanner.nextLine();
+            this.gifPath = solPath + File.separator + gifFileName;
         }
     }
+    
 
     public int getHeight() {
         return height;
@@ -75,12 +85,12 @@ public class InputParser {
         return rgbMatrix;
     }
 
-    public String getOutputFileName() {
-        return outputFileName;
+    public String getOutputPath() {
+        return outputPath;
     }
 
-    public int getErrorMethod() {
-        return errorMethod;
+    public ErrorMetric getErrorMetric() {
+        return errorMetric;
     }
 
     public double getThreshold() {
@@ -91,8 +101,25 @@ public class InputParser {
         return minBlockSize;
     }
 
-    public boolean getShowAvgColors() {
-        return showAvgColors;
+    public File getInputFile() {
+        return inputFile;
+    }
+
+    public String getGifPath() {
+        return gifPath;
+    }
+
+        /*
+     * Metode untuk menampilkan daftar metode error yang tersedia.
+    */
+
+    public static void displayErrorMetrics() {
+        System.out.println("Daftar Metode Error:");
+        System.out.println("1. Variance");
+        System.out.println("2. Mean Absolute Deviation");
+        System.out.println("3. Max Pixel Difference");
+        System.out.println("4. Entropy");
+        System.out.print("\nEnter error metric choice (1-4): ");
     }
 }
 

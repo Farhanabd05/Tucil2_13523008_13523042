@@ -1,1 +1,2 @@
 
+ada yg salah di isLeaf nya
