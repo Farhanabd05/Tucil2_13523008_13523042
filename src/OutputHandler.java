@@ -82,17 +82,21 @@ public class OutputHandler {
         int width = rgbMatrix.getWidth();
         int height = rgbMatrix.getHeight();
         BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-        
+    
+        int[] rgbArray = new int[width * height];
         Pixel[] pixels = rgbMatrix.getPixels();
-        int[] rgbArray = new int[pixels.length];
+    
         for (int i = 0; i < pixels.length; i++) {
             rgbArray[i] = pixels[i].getRGB();
         }
-        
+    
         bufferedImage.setRGB(0, 0, width, height, rgbArray, 0, width);
+    
+        // Buang referensi ke rgbArray untuk mengurangi penggunaan memori
+        rgbArray = null;
+    
         return bufferedImage;
     }
-    
     public static void writeImage2 (RGBMatrix rgbMatrix, String outputPath) throws IOException {
         int width = rgbMatrix.getWidth();
         int height = rgbMatrix.getHeight();

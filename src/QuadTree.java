@@ -167,50 +167,57 @@ public class QuadTree {
     //     this.gifRecorder = gifRecorder;
     // }
 
-    public void createGifFramesRecursive(QuadTreeNode node, List<BufferedImage> frames, int currentDepth) throws IOException {
-        // Salin matriks asli untuk mempertahankan data original
-        RGBMatrix currentFrame = this.rgbMatrix.copy();
-        
-        // Terapkan warna rata-rata untuk node di kedalaman saat ini
-        applyColorAtDepth(node, currentFrame, currentDepth, 0);
-        
-        // Konversi ke BufferedImage dan tambahkan ke frame
-        BufferedImage frame = OutputHandler.convertToBufferedImage(currentFrame);
-        frames.add(frame);
+    // Modified QuadTree.java method for better GIF frame creation
+public void createGifFramesRecursive(QuadTreeNode root, List<BufferedImage> frames, int maxDepth) throws IOException {
+    // Create a frame showing the original image first
+    RGBMatrix originalMatrix = this.rgbMatrix.copy();
+    frames.add(OutputHandler.convertToBufferedImage(originalMatrix));
     
-        // Rekursi untuk kedalaman berikutnya jika node bukan leaf
-        if (!node.isLeaf() && currentDepth < this.maxDepth) {
-            createGifFramesRecursive(node, frames, currentDepth + 1);
-        }
+    // For each depth level, create a visualization frame
+    for (int depth = 0; depth <= maxDepth; depth++) {
+        // Create a fresh copy of the matrix for this depth level
+        RGBMatrix depthMatrix = this.rgbMatrix.copy();
+        
+        // Apply colors based on current depth level
+        applyColorsAtDepth(root, depthMatrix, depth, 0);
+        
+        // Add the rendered matrix as a frame
+        BufferedImage frame = OutputHandler.convertToBufferedImage(depthMatrix);
+        frames.add(frame);
     }
+}
 
-    public void applyColorAtDepth(QuadTreeNode node, RGBMatrix matrix, int targetDepth, int currentDepth) {
-        if (currentDepth > maxDepth) {
-            // Jika maxDepth dilampaui, maka tidak perlu mengakses getAverageColor()
-            return;
-        }
-        if (currentDepth == targetDepth && node.isLeaf()) {
-            // Pastikan nilai getAverageColor() diinisialisasi
-            Pixel averageColor = node.getAverageColor();
-            if (averageColor != null) {
-                // Terapkan warna rata-rata node
-                for (int y = node.getY(); y < node.getY() + node.getHeight(); y++) {
-                    for (int x = node.getX(); x < node.getX() + node.getWidth(); x++) {
-                        matrix.setPixel(x, y, averageColor.getRGB());
-                    }
-                }
-            } else {
-                // Jika nilai getAverageColor() null, maka lakukan sesuatu untuk mengatasinya
-                System.out.println("Nilai getAverageColor() null");
-            }
-        } else if (!node.isLeaf()) {
-            // Rekursi ke anak-anak node
-            applyColorAtDepth(node.getTopLeft(), matrix, targetDepth, currentDepth + 1);
-            applyColorAtDepth(node.getTopRight(), matrix, targetDepth, currentDepth + 1);
-            applyColorAtDepth(node.getBottomLeft(), matrix, targetDepth, currentDepth + 1);
-            applyColorAtDepth(node.getBottomRight(), matrix, targetDepth, currentDepth + 1);
-        }
+// Modified method to apply colors at specific depth
+private void applyColorsAtDepth(QuadTreeNode node, RGBMatrix matrix, int targetDepth, int currentDepth) {
+    // Base case: we've reached a leaf node
+    if (node == null) {
+        return;
     }
+    
+    // Case 1: Current node is at target depth, or is a leaf at a lesser depth
+    if (currentDepth == targetDepth || (node.isLeaf() && currentDepth < targetDepth)) {
+        // Calculate average color if not already calculated
+        if (node.getAverageColor() == null) {
+            node.calculateAverageColor(rgbMatrix);
+        }
+        
+        // Apply average color to all pixels in this node's region
+        for (int y = node.getY(); y < node.getY() + node.getHeight(); y++) {
+            for (int x = node.getX(); x < node.getX() + node.getWidth(); x++) {
+                if (x < matrix.getWidth() && y < matrix.getHeight()) {
+                    matrix.setPixel(x, y, node.getAverageColor().getRGB());
+                }
+            }
+        }
+    } 
+    // Case 2: Not yet at target depth and has children, process children
+    else if (currentDepth < targetDepth && !node.isLeaf()) {
+        applyColorsAtDepth(node.getTopLeft(), matrix, targetDepth, currentDepth + 1);
+        applyColorsAtDepth(node.getTopRight(), matrix, targetDepth, currentDepth + 1);
+        applyColorsAtDepth(node.getBottomLeft(), matrix, targetDepth, currentDepth + 1);
+        applyColorsAtDepth(node.getBottomRight(), matrix, targetDepth, currentDepth + 1);
+    }
+}
 
     public QuadTreeNode getRoot() {
         return this.root;

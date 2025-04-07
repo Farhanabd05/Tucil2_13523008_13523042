@@ -1,6 +1,5 @@
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 import javax.imageio.ImageIO;
 import javax.imageio.stream.FileImageOutputStream;
 import javax.imageio.stream.ImageOutputStream;
@@ -19,42 +18,34 @@ public class Main {
             System.out.println("[DEBUG] Nilai RGB sample di (0,0): " + rgbMatrix.getPixel(0, 0));
 
             long startTime = System.currentTimeMillis();
-            QuadTree quadTree = new QuadTree(rgbMatrix, parser.getErrorMetric(), parser.getThreshold(), parser.getMinBlockSize());
-            // boolean createGif = !parser.getGifPath().isEmpty();
-            // long originalSize = parser.getInputFile().length();
             
-            List<BufferedImage> gifFrames = new ArrayList<>();
-            quadTree.createGifFramesRecursive(
-                quadTree.getRoot(), 
-                gifFrames, 
-                0
-            );
-            // // List untuk menyimpan frame GIF jika diaktifkan
-            // List<BufferedImage> gifFrames = new ArrayList<>();
-            // if (createGif) {
-            //     BufferedImage image = ImageIO.read(parser.getInputFile());
-            //     gifFrames.add(deepCopy(image));
-            // }
+            // Create QuadTree and build it first (before generating GIF frames)
+            QuadTree quadTree = new QuadTree(rgbMatrix, parser.getErrorMetric(), parser.getThreshold(), parser.getMinBlockSize());
             quadTree.buildTree();
+            
+            // Now create GIF frames showing the progressive decomposition
+            List<BufferedImage> gifFrames = new ArrayList<>();
+            quadTree.createGifFramesRecursive(quadTree.getRoot(), gifFrames, quadTree.getMaxDepth());
+            
             long endTime = System.currentTimeMillis();
             long elapsedTime = endTime - startTime;
+            
+            // Save the output image
             OutputHandler.writeImage(quadTree, parser.getOutputPath(), parser.getInputFile(), elapsedTime);
-
             System.out.println("[DEBUG] Konversi matriks RGB ke gambar selesai.");
 
-            // // Buat dan simpan GIF jika diaktifkan
-            // if (createGif && !gifFrames.isEmpty()) {
-            //     saveGif(gifFrames, parser.getGifPath());
-            //     System.out.println("8. GIF proses kompresi tersimpan di: " + parser.getGifPath());
-            // }
-            saveGif(gifFrames, parser.getGifPath());
+            // Save GIF with proper frame delay
+            if (!gifFrames.isEmpty()) {
+                saveGif(gifFrames, parser.getGifPath(), 500); // 500ms delay between frames
+                System.out.println("[INFO] GIF visualisasi proses kompresi tersimpan di: " + parser.getGifPath());
+            }
 
         } catch (IOException e) {
             System.err.println("[ERROR] Terjadi kesalahan saat membaca file gambar: " + e.getMessage());
             e.printStackTrace();
         }
-        
     }
+
     /**
      * Membuat salinan mendalam dari BufferedImage
      */
@@ -67,31 +58,9 @@ public class Main {
     }
 
     /**
-     * Menyimpan rangkaian frame sebagai GIF
+     * Menyimpan rangkaian frame sebagai GIF dengan delay tertentu
      */
-    // private static void saveGif(List<BufferedImage> frames, String outputPath) {
-    //     // Implementasi penyimpanan GIF
-    //     // Note: Implementasi GIF memerlukan library tambahan seperti GifSequenceWriter
-    //     // Untuk keperluan tugas ini, bisa menggunakan library seperti gifsicle atau ImageMagick
-    //     System.out.println("GIF generation requires external library. Please implement using suitable GIF library.");
-        
-    //     // Contoh pseudocode untuk GifSequenceWriter
-    //     try {
-    //         ImageOutputStream output = new FileImageOutputStream(new File(outputPath));
-    //         GifSequenceWriter writer = new GifSequenceWriter(output, frames.get(0).getType(), 500, true);
-            
-    //         for (BufferedImage frame : frames) {
-    //             writer.writeToSequence(frame);
-    //         }
-            
-    //         writer.close();
-    //         output.close();
-    //     } catch (IOException e) {
-    //         e.printStackTrace();
-    //     }
-    // }
-
-    private static void saveGif(List<BufferedImage> frames, String path) {
+    private static void saveGif(List<BufferedImage> frames, String path, int frameDelay) {
         try {
             ImageOutputStream output = 
                 new FileImageOutputStream(new File(path));
@@ -104,12 +73,14 @@ public class Main {
                 );
             
             for (BufferedImage frame : frames) {
-                writer.writeToSequence(frame, 500);
+                writer.writeToSequence(frame, frameDelay);
             }
             
             writer.close();
             output.close();
+            System.out.println("[INFO] Successfully saved GIF with " + frames.size() + " frames");
         } catch (IOException e) {
+            System.err.println("[ERROR] Failed to save GIF: " + e.getMessage());
             e.printStackTrace();
         }
     }

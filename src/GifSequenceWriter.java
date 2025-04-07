@@ -16,7 +16,7 @@ public class GifSequenceWriter {
    * 
    * @param outputStream the ImageOutputStream to be written to
    * @param imageType one of the imageTypes specified in BufferedImage
-   * @param loopContinuously wether the gif should loop repeatedly
+   * @param loopContinuously whether the gif should loop repeatedly
    * @throws IIOException if no gif ImageWriters are found
    *
    * @author Elliot Kroo (elliot[at]kroo[dot]net)
@@ -57,15 +57,18 @@ public class GifSequenceWriter {
     graphicsControlExtensionNode.setAttribute(
       "transparentColorFlag",
       "FALSE");
+    
+    // Frame delay is in hundredths of a second, so convert from milliseconds
+    int delayInHundredths = frameDelay / 10;
     graphicsControlExtensionNode.setAttribute(
               "delayTime",
-              Integer.toString(frameDelay / 10));
+              Integer.toString(delayInHundredths));
     graphicsControlExtensionNode.setAttribute(
       "transparentColorIndex",
       "0");
 
     IIOMetadataNode commentsNode = getNode(root, "CommentExtensions");
-    commentsNode.setAttribute("CommentExtension", "Created by MAH");
+    commentsNode.setAttribute("CommentExtension", "Created by QuadTree Compression");
 
     IIOMetadataNode appEntensionsNode = getNode(
       root,
@@ -86,10 +89,11 @@ public class GifSequenceWriter {
   }
   
   /**
+   * Adds an image to the GIF sequence
    * 
-   * @param img
-   * @param frameDelay milliseconds
-   * @throws IOException 
+   * @param img the image to add
+   * @param frameDelay delay in milliseconds before showing the next frame
+   * @throws IOException if there's an I/O error
    */
   public void writeToSequence(RenderedImage img, int frameDelay) throws IOException {
       setSettings(frameDelay);
@@ -148,12 +152,4 @@ public class GifSequenceWriter {
     rootNode.appendChild(node);
     return(node);
   }
-  
-  /**
-  public GifSequenceWriter(
-       BufferedOutputStream outputStream,
-       int imageType,
-       int timeBetweenFramesMS,
-       boolean loopContinuously) {
-   */
 }
