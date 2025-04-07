@@ -1,16 +1,16 @@
-import java.util.ArrayList;
-import java.util.List;
-import javax.imageio.ImageIO;
-import javax.imageio.stream.FileImageOutputStream;
-import javax.imageio.stream.ImageOutputStream;
 import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
+import javax.imageio.stream.FileImageOutputStream;
+import javax.imageio.stream.ImageOutputStream;
 
 public class Main {
     public static void main(String[] args) {
         InputParser parser = new InputParser();
+        
         try {
             parser.parseInput();
             RGBMatrix rgbMatrix = parser.getRGBMatrix();
@@ -60,28 +60,52 @@ public class Main {
     /**
      * Menyimpan rangkaian frame sebagai GIF dengan delay tertentu
      */
-    private static void saveGif(List<BufferedImage> frames, String path, int frameDelay) {
-        try {
-            ImageOutputStream output = 
-                new FileImageOutputStream(new File(path));
+/**
+ * Menyimpan rangkaian frame sebagai GIF dengan delay tertentu
+ */
+private static void saveGif(List<BufferedImage> frames, String path, int frameDelay) {
+    try {
+        ImageOutputStream output = new FileImageOutputStream(new File(path));
+        
+        GifSequenceWriter writer = new GifSequenceWriter(
+            output, 
+            BufferedImage.TYPE_INT_RGB, 
+            true
+        );
+        
+        System.out.println("[INFO] Writing " + frames.size() + " frames to GIF...");
+        
+        // Track memory usage
+        Runtime runtime = Runtime.getRuntime();
+        long startMem = runtime.totalMemory() - runtime.freeMemory();
+        
+        // Process each frame
+        for (int i = 0; i < frames.size(); i++) {
+            BufferedImage frame = frames.get(i);
+            writer.writeToSequence(frame, frameDelay);
             
-            GifSequenceWriter writer = 
-                new GifSequenceWriter(
-                    output, 
-                    BufferedImage.TYPE_INT_RGB, 
-                    true
-                );
-            
-            for (BufferedImage frame : frames) {
-                writer.writeToSequence(frame, frameDelay);
+            // Free memory after writing - important for large images
+            if (i % 5 == 0) { // Every 5 frames
+                frames.set(i, null); // Help garbage collector
+                System.gc(); // Request garbage collection
             }
             
-            writer.close();
-            output.close();
-            System.out.println("[INFO] Successfully saved GIF with " + frames.size() + " frames");
-        } catch (IOException e) {
-            System.err.println("[ERROR] Failed to save GIF: " + e.getMessage());
-            e.printStackTrace();
+            // Print progress for large GIFs
+            if (i % 10 == 0 || i == frames.size() - 1) {
+                System.out.println("[INFO] Processed " + (i + 1) + "/" + frames.size() + " frames");
+            }
         }
+        
+        writer.close();
+        output.close();
+        
+        // Report memory use
+        long endMem = runtime.totalMemory() - runtime.freeMemory();
+        System.out.println("[INFO] Successfully saved GIF with " + frames.size() + 
+                          " frames (Memory used: " + ((endMem - startMem) / 1024 / 1024) + "MB)");
+    } catch (IOException e) {
+        System.err.println("[ERROR] Failed to save GIF: " + e.getMessage());
+        e.printStackTrace();
     }
+}
 }

@@ -1,9 +1,7 @@
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
-import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 
 public class InputParser {
@@ -20,16 +18,11 @@ public class InputParser {
 
     public void parseInput() throws IOException {
         try (Scanner scanner = new Scanner(System.in)) {
-            String currentDir = System.getProperty("user.dir");
-            String testPath = currentDir.substring(0, currentDir.lastIndexOf(File.separator)) + File.separator + "test" + File.separator + "tc";
-            String solPath = currentDir.substring(0, currentDir.lastIndexOf(File.separator)) + File.separator + "test" + File.separator + "sol";
 
             System.out.println("Masukkan nama file: ");
-            String inputfileName = scanner.nextLine();
-            String inputFilePath = testPath + File.separator + inputfileName;
+            String inputFilePath = scanner.nextLine();
             System.out.println("Masukkan nama file output: ");
-            String outputFileName = scanner.nextLine();
-            this.outputPath = solPath + File.separator + outputFileName;
+            this.outputPath = scanner.nextLine();
 
             BufferedImage image = ImageIO.read(new File(inputFilePath));
             if (image == null) {
@@ -66,9 +59,8 @@ public class InputParser {
 
             this.inputFile = new File(inputFilePath);
             
-            System.out.println("\n Enter gif path : ");
-            String gifFileName= scanner.nextLine();
-            this.gifPath = solPath + File.separator + gifFileName;
+            System.out.println("\nEnter gif path : ");
+            this.gifPath = scanner.nextLine();
         }
     }
     
