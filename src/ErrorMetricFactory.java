@@ -19,6 +19,7 @@ public class ErrorMetricFactory {
             case 2 -> new MADErrorMetric();
             case 3 -> new MaxPixelDifferenceErrorMetric();
             case 4 -> new EntropyErrorMetric();
+            case 5 -> new SSIMErrorMetric();
             default -> throw new IllegalArgumentException("Metode error tidak valid.");
         };
     }

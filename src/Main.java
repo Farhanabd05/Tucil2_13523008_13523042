@@ -2,8 +2,6 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import javax.imageio.stream.FileImageOutputStream;
 import javax.imageio.stream.ImageOutputStream;
 
@@ -23,10 +21,6 @@ public class Main {
             QuadTree quadTree = new QuadTree(rgbMatrix, parser.getErrorMetric(), parser.getThreshold(), parser.getMinBlockSize());
             quadTree.buildTree();
             
-            // Now create GIF frames showing the progressive decomposition
-            List<BufferedImage> gifFrames = new ArrayList<>();
-            quadTree.createGifFramesRecursive(quadTree.getRoot(), gifFrames, quadTree.getMaxDepth());
-            
             long endTime = System.currentTimeMillis();
             long elapsedTime = endTime - startTime;
             
@@ -35,10 +29,10 @@ public class Main {
             System.out.println("[DEBUG] Konversi matriks RGB ke gambar selesai.");
 
             // Save GIF with proper frame delay
-            if (!gifFrames.isEmpty()) {
-                saveGif(gifFrames, parser.getGifPath(), 500); // 500ms delay between frames
-                System.out.println("[INFO] GIF visualisasi proses kompresi tersimpan di: " + parser.getGifPath());
+            if (parser.getGifPath() != null && !parser.getGifPath().trim().isEmpty()) {
+                saveGifIncrementally(quadTree, parser.getGifPath(), 500); // delay 500ms per frame
             }
+
 
         } catch (IOException e) {
             System.err.println("[ERROR] Terjadi kesalahan saat membaca file gambar: " + e.getMessage());
@@ -57,55 +51,56 @@ public class Main {
         return copy;
     }
 
-    /**
-     * Menyimpan rangkaian frame sebagai GIF dengan delay tertentu
+        /**
+     * Menyimpan GIF secara incremental dengan menulis frame langsung ke output.
+     * Metode ini menghindari penampungan seluruh frame dalam memori.
+     *
+     * @param quadTree QuadTree yang sudah dibangun dan berisi gambar asli serta struktur kompresi
+     * @param path     Path output GIF
+     * @param frameDelay Delay antar frame dalam milidetik
      */
-/**
- * Menyimpan rangkaian frame sebagai GIF dengan delay tertentu
- */
-private static void saveGif(List<BufferedImage> frames, String path, int frameDelay) {
-    try {
-        ImageOutputStream output = new FileImageOutputStream(new File(path));
-        
-        GifSequenceWriter writer = new GifSequenceWriter(
-            output, 
-            BufferedImage.TYPE_INT_RGB, 
-            true
-        );
-        
-        System.out.println("[INFO] Writing " + frames.size() + " frames to GIF...");
-        
-        // Track memory usage
-        Runtime runtime = Runtime.getRuntime();
-        long startMem = runtime.totalMemory() - runtime.freeMemory();
-        
-        // Process each frame
-        for (int i = 0; i < frames.size(); i++) {
-            BufferedImage frame = frames.get(i);
-            writer.writeToSequence(frame, frameDelay);
+    private static void saveGifIncrementally(QuadTree quadTree, String path, int frameDelay) {
+        try (ImageOutputStream output = new FileImageOutputStream(new File(path))) {
+            // Buat writer dengan tipe image INT_RGB dan frame delay tertentu
+            GifSequenceWriter writer = new GifSequenceWriter(output, BufferedImage.TYPE_INT_RGB, frameDelay, true);
             
-            // Free memory after writing - important for large images
-            if (i % 5 == 0) { // Every 5 frames
-                frames.set(i, null); // Help garbage collector
-                System.gc(); // Request garbage collection
+            // Tulis frame awal: gambar asli (tanpa kompresi)
+            BufferedImage initialFrame = OutputHandler.convertToBufferedImage(quadTree.getRGBMatrix());
+            writer.writeToSequence(initialFrame, frameDelay);
+            System.out.println("[INFO] Written initial frame.");
+            
+            // Menulis frame intermediet secara incremental
+            int maxDepth = quadTree.getMaxDepth();
+            // Batasi jumlah frame agar tidak terlalu banyak (misalnya, maksimum 15 frame)
+            int frameCount = Math.min(maxDepth + 1, 15);
+            double depthStep = maxDepth / (double)(frameCount - 1);
+            
+            for (int i = 1; i < frameCount; i++) {
+                int depth = (int)Math.round(i * depthStep);
+                
+                // Buat objek RGBMatrix baru untuk frame pada depth tertentu
+                RGBMatrix depthMatrix = new RGBMatrix(quadTree.getRGBMatrix().getWidth(), quadTree.getRGBMatrix().getHeight());
+                
+                // Terapkan warna ke depthMatrix berdasarkan depth tertentu (gunakan metode rekursif yang sama)
+                quadTree.applyColorsAtDepth(quadTree.getRoot(), depthMatrix, depth, 0);
+                
+                // Ubah RGBMatrix hasil ke BufferedImage untuk ditulis ke file GIF
+                BufferedImage frame = OutputHandler.convertToBufferedImage(depthMatrix);
+                writer.writeToSequence(frame, frameDelay);
+                
+                // Bebaskan referensi agar garbage collector dapat menghapus
+                depthMatrix = null;
+                frame = null;
+                System.gc();
+                
+                System.out.println("[INFO] Written frame for depth " + depth);
             }
             
-            // Print progress for large GIFs
-            if (i % 10 == 0 || i == frames.size() - 1) {
-                System.out.println("[INFO] Processed " + (i + 1) + "/" + frames.size() + " frames");
-            }
+            writer.close();
+            System.out.println("[INFO] Successfully saved GIF incrementally at: " + path);
+        } catch (IOException e) {
+            System.err.println("[ERROR] Failed to save GIF incrementally: " + e.getMessage());
+            e.printStackTrace();
         }
-        
-        writer.close();
-        output.close();
-        
-        // Report memory use
-        long endMem = runtime.totalMemory() - runtime.freeMemory();
-        System.out.println("[INFO] Successfully saved GIF with " + frames.size() + 
-                          " frames (Memory used: " + ((endMem - startMem) / 1024 / 1024) + "MB)");
-    } catch (IOException e) {
-        System.err.println("[ERROR] Failed to save GIF: " + e.getMessage());
-        e.printStackTrace();
     }
-}
 }

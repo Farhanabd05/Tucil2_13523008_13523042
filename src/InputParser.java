@@ -18,100 +18,112 @@ public class InputParser {
 
     public void parseInput() throws IOException {
         try (Scanner scanner = new Scanner(System.in)) {
-
-            System.out.println("Masukkan nama file: ");
+            // Clear screen and show program logo
+            CLIUtils.clearScreen();
+            CLIUtils.printLogo();
+            
+            // Input file selection
+            CLIUtils.printSectionHeader("STEP 1: SELECT INPUT IMAGE");
+            System.out.print(CLIUtils.BOLD + "Enter path to image file: " + CLIUtils.RESET);
             String inputFilePath = scanner.nextLine();
-            System.out.println("Masukkan nama file output: ");
-            this.outputPath = scanner.nextLine();
-
-            BufferedImage image = ImageIO.read(new File(inputFilePath));
+            
+            CLIUtils.simulateLoading("Loading image...", 1500);
+            
+            // Load image
+            this.inputFile = new File(inputFilePath);
+            BufferedImage image = ImageIO.read(inputFile);
             if (image == null) {
-                throw new IOException("[ERROR] GAGAL membaca file image, pastikan file tersebut benar dan didukung");
+                CLIUtils.printError("Failed to load image. Please ensure the file exists and is a valid image format.");
+                throw new IOException("Cannot read image file");
             }
-
-            System.out.println("[DEBUG] Gambar berhasil dimuat");
+            
             this.width = image.getWidth();
             this.height = image.getHeight();
-            System.out.println("[DEBUG] Dimensi Gambar: " + width + " x " + height);
-
+            CLIUtils.printSuccess("Image loaded successfully: " + width + "×" + height + " pixels");
+            
+            // Output file selection
+            CLIUtils.printSectionHeader("STEP 2: SET OUTPUT LOCATION");
+            System.out.print(CLIUtils.BOLD + "Enter path for compressed image: " + CLIUtils.RESET);
+            this.outputPath = scanner.nextLine();
+            
+            // Convert image to RGB matrix
+            CLIUtils.printInfo("Converting image to RGB matrix...");
             this.rgbMatrix = new RGBMatrix(width, height);
-            System.out.println("[DEBUG] Objek RGBMatrix dibuat dengan dimensi: " + width + " x " + height);
-
-            // Konversi gambar ke matriks RGB
+            
+            // Show progress bar for conversion
             int[] rgbArray = image.getRGB(0, 0, width, height, null, 0, width);
+            int totalPixels = rgbArray.length;
             for (int i = 0; i < rgbArray.length; i++) {
                 rgbMatrix.setPixel(i % width, i / width, rgbArray[i]);
+                
+                if (i % (totalPixels / 100) == 0) {
+                    CLIUtils.printProgressBar((i * 100) / totalPixels);
+                }
             }
-
-            // 2. Choose error metric
+            CLIUtils.printProgressBar(100);
+            System.out.println();
+            CLIUtils.printSuccess("Image converted to RGB matrix");
+            
+            // Error metric selection
+            CLIUtils.printSectionHeader("STEP 3: COMPRESSION PARAMETERS");
             displayErrorMetrics();
             int errorMetricChoice = scanner.nextInt();
             errorMetric = ErrorMetricFactory.createErrorMetric(errorMetricChoice);
+            CLIUtils.printSuccess("Selected error metric: " + errorMetric.getName());
 
-            // 3. Error threshold
-            System.out.print("\nEnter error threshold value: ");
+            // Error threshold
+            System.out.print(CLIUtils.BOLD + "\nEnter error threshold value: " + CLIUtils.RESET);
             threshold = scanner.nextDouble();
 
-            // 4. Minimum block size
-            System.out.print("\nEnter minimum block size (e.g., 4): ");
+            // Minimum block size
+            System.out.print(CLIUtils.BOLD + "\nEnter minimum block size (e.g., 4): " + CLIUtils.RESET);
             minBlockSize = scanner.nextInt();
             scanner.nextLine(); // Consume newline
-
-            this.inputFile = new File(inputFilePath);
             
-            System.out.println("\nEnter gif path : ");
+            // GIF path
+            CLIUtils.printSectionHeader("STEP 4: GIF VISUALIZATION");
+            System.out.print(CLIUtils.BOLD + "Enter path for GIF animation (leave empty to skip): " + CLIUtils.RESET);
             this.gifPath = scanner.nextLine();
+            
+            CLIUtils.printSectionHeader("READY TO COMPRESS");
+            CLIUtils.printInfo("Image: " + inputFile.getName() + " (" + width + "×" + height + ")");
+            CLIUtils.printInfo("Error metric: " + errorMetric.getName());
+            CLIUtils.printInfo("Error threshold: " + threshold);
+            CLIUtils.printInfo("Minimum block size: " + minBlockSize);
+            
+            if (!gifPath.isEmpty()) {
+                CLIUtils.printInfo("GIF animation will be created at: " + gifPath);
+            } else {
+                CLIUtils.printWarning("GIF animation skipped");
+            }
+            
+            System.out.println(CLIUtils.BOLD + CLIUtils.GREEN + "\nStarting compression in 3 seconds..." + CLIUtils.RESET);
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            CLIUtils.clearScreen();
         }
     }
-    
-
-    public int getHeight() {
-        return height;
-    }
-
-    public int getWidth() {
-        return width;
-    }
-
-    public RGBMatrix getRGBMatrix() {
-        return rgbMatrix;
-    }
-
-    public String getOutputPath() {
-        return outputPath;
-    }
-
-    public ErrorMetric getErrorMetric() {
-        return errorMetric;
-    }
-
-    public double getThreshold() {
-        return threshold;
-    }
-
-    public int getMinBlockSize() {
-        return minBlockSize;
-    }
-
-    public File getInputFile() {
-        return inputFile;
-    }
-
-    public String getGifPath() {
-        return gifPath;
-    }
-
-        /*
-     * Metode untuk menampilkan daftar metode error yang tersedia.
-    */
 
     public static void displayErrorMetrics() {
-        System.out.println("Daftar Metode Error:");
-        System.out.println("1. Variance");
-        System.out.println("2. Mean Absolute Deviation");
-        System.out.println("3. Max Pixel Difference");
-        System.out.println("4. Entropy");
-        System.out.print("\nEnter error metric choice (1-4): ");
+        System.out.println(CLIUtils.BOLD + "Available Error Metrics:" + CLIUtils.RESET);
+        System.out.println(CLIUtils.CYAN + "1. " + CLIUtils.RESET + "Variance (Standard deviation of pixel values)");
+        System.out.println(CLIUtils.CYAN + "2. " + CLIUtils.RESET + "Mean Absolute Deviation (Average difference from mean)");
+        System.out.println(CLIUtils.CYAN + "3. " + CLIUtils.RESET + "Max Pixel Difference (Maximum difference between pixels)");
+        System.out.println(CLIUtils.CYAN + "4. " + CLIUtils.RESET + "Entropy (Information content measure)");
+        System.out.print(CLIUtils.BOLD + "\nSelect error metric (1-4): " + CLIUtils.RESET);
     }
+    
+    // Getters remain unchanged
+    public int getHeight() { return height; }
+    public int getWidth() { return width; }
+    public RGBMatrix getRGBMatrix() { return rgbMatrix; }
+    public String getOutputPath() { return outputPath; }
+    public ErrorMetric getErrorMetric() { return errorMetric; }
+    public double getThreshold() { return threshold; }
+    public int getMinBlockSize() { return minBlockSize; }
+    public File getInputFile() { return inputFile; }
+    public String getGifPath() { return gifPath; }
 }
-

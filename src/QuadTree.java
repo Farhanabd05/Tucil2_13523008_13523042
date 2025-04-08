@@ -6,9 +6,9 @@
  * threshold error dan ukuran minimum blok.
 */
 
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.List;
-import java.awt.image.BufferedImage;
 
 
 public class QuadTree {
@@ -216,7 +216,7 @@ public void createGifFramesRecursive(QuadTreeNode root, List<BufferedImage> fram
  * @param targetDepth Target depth to render
  * @param currentDepth Current depth in the recursion
  */
-private void applyColorsAtDepth(QuadTreeNode node, RGBMatrix matrix, int targetDepth, int currentDepth) {
+public void applyColorsAtDepth(QuadTreeNode node, RGBMatrix matrix, int targetDepth, int currentDepth) {
     if (node == null) return;
     
     // Case 1: We've reached the target depth or a leaf node
