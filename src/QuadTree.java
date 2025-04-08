@@ -6,11 +6,6 @@
  * threshold error dan ukuran minimum blok.
 */
 
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.util.List;
-
-
 public class QuadTree {
     // root node dari quadtree
     private QuadTreeNode root;
@@ -167,46 +162,6 @@ public class QuadTree {
     //     this.gifRecorder = gifRecorder;
     // }
 
-/**
- * Creates frames for GIF visualization with memory optimization
- * 
- * @param root The root node of the quadtree
- * @param frames List to store generated frames
- * @param maxDepth Maximum depth of the quadtree
- */
-public void createGifFramesRecursive(QuadTreeNode root, List<BufferedImage> frames, int maxDepth) throws IOException {
-    System.out.println("[INFO] Generating GIF frames for quadtree visualization...");
-    
-    // Calculate how many frames to generate (avoid too many frames for deep trees)
-    int frameCount = Math.min(maxDepth + 1, 15);  // Cap at 15 frames
-    double depthStep = maxDepth / (double)(frameCount - 1);
-    
-    // Create original image frame
-    frames.add(OutputHandler.convertToBufferedImage(this.rgbMatrix));
-    System.out.println("[INFO] Added original image frame");
-    
-    // Generate intermediate frames using depth steps
-    for (int i = 1; i < frameCount; i++) {
-        int depth = (int)Math.round(i * depthStep);
-        
-        // Create a fresh matrix for this depth
-        RGBMatrix depthMatrix = new RGBMatrix(rgbMatrix.getWidth(), rgbMatrix.getHeight());
-        
-        // Apply colors based on current depth
-        System.out.println("[INFO] Generating frame for depth " + depth + "...");
-        applyColorsAtDepth(root, depthMatrix, depth, 0);
-        
-        // Create and add the frame
-        BufferedImage frame = OutputHandler.convertToBufferedImage(depthMatrix);
-        frames.add(frame);
-        
-        // Help garbage collector
-        depthMatrix = null;
-        System.gc();
-    }
-    
-    System.out.println("[INFO] Generated " + frames.size() + " GIF frames");
-}
 
 /**
  * Apply colors to a matrix at a specific depth of the quadtree
