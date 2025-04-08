@@ -1,14 +1,9 @@
-import java.awt.image.BufferedImage;
-import java.io.IOException;
+import java.awt.image.*;
+import java.io.*;
 import java.util.Iterator;
-import javax.imageio.IIOImage;
-import javax.imageio.ImageIO;
-import javax.imageio.ImageTypeSpecifier;
-import javax.imageio.ImageWriteParam;
-import javax.imageio.ImageWriter;
-import javax.imageio.metadata.IIOMetadata;
-import javax.imageio.metadata.IIOMetadataNode;
-import javax.imageio.stream.ImageOutputStream;
+import javax.imageio.*;
+import javax.imageio.metadata.*;
+import javax.imageio.stream.*;
 
 public class GifSequenceWriter {
     protected ImageWriter gifWriter;
@@ -16,88 +11,81 @@ public class GifSequenceWriter {
     protected IIOMetadata imageMetaData;
 
     /**
-     * Membuat objek GifSequenceWriter.
+     * Create a GIF sequence writer
      * 
-     * @param outputStream        ImageOutputStream ke file output GIF
-     * @param imageType           Tipe gambar (misal BufferedImage.TYPE_INT_RGB)
-     * @param timeBetweenFramesMS Delay antar frame (dalam milidetik) untuk default
-     * @param loopContinuously    Jika true, GIF akan di-loop terus-menerus
-     * @throws IOException        Jika tidak ada writer GIF yang tersedia atau terjadi error lainnya
+     * @param outputStream the ImageOutputStream to which the images will be written
+     * @param imageType the type of image to create (BufferedImage.TYPE_INT_RGB, etc)
+     * @param loopContinuously if true, the GIF will loop forever
+     * @throws IOException if no GIF ImageWriters are found or an error occurs
      */
-    public GifSequenceWriter(ImageOutputStream outputStream, int imageType, int timeBetweenFramesMS, boolean loopContinuously) throws IOException {
-        // Ambil GIF writer
+    public GifSequenceWriter(ImageOutputStream outputStream, int imageType, boolean loopContinuously) throws IOException {
+        // Get GIF writer
         gifWriter = getWriter();
         imageWriteParam = gifWriter.getDefaultWriteParam();
 
-        // Dapatkan metadata default
+        // Get default metadata
         ImageTypeSpecifier imageTypeSpecifier = ImageTypeSpecifier.createFromBufferedImageType(imageType);
         imageMetaData = gifWriter.getDefaultImageMetadata(imageTypeSpecifier, imageWriteParam);
 
-        // Konfigurasi metadata awal untuk GIF
+        // Configure metadata
         String metaFormatName = imageMetaData.getNativeMetadataFormatName();
         IIOMetadataNode root = (IIOMetadataNode) imageMetaData.getAsTree(metaFormatName);
 
-        // Set Graphic Control Extension (untuk delay dan disposal method)
-        IIOMetadataNode gceNode = getNode(root, "GraphicControlExtension");
-        gceNode.setAttribute("disposalMethod", "none");
-        gceNode.setAttribute("userInputFlag", "FALSE");
-        gceNode.setAttribute("transparentColorFlag", "FALSE");
-        // Delay default dalam satuan 1/100 detik
-        gceNode.setAttribute("delayTime", Integer.toString(timeBetweenFramesMS / 10));
-        gceNode.setAttribute("transparentColorIndex", "0");
-
-        // Set Application Extension untuk looping
-        IIOMetadataNode appExtensionsNode = getNode(root, "ApplicationExtensions");
-        IIOMetadataNode appNode = new IIOMetadataNode("ApplicationExtension");
-        appNode.setAttribute("applicationID", "NETSCAPE");
-        appNode.setAttribute("authenticationCode", "2.0");
-        // Jika loopContinuously true, loop=0 (tak terbatas)
-        int loop = loopContinuously ? 0 : 1;
-        appNode.setUserObject(new byte[] { 0x1, (byte)(loop & 0xFF), (byte)((loop >> 8) & 0xFF) });
-        appExtensionsNode.appendChild(appNode);
-
-        // Perbarui metadata dari tree
-        imageMetaData.setFromTree(metaFormatName, root);
-
-        // Siapkan writer
+        // Set GIF as output
         gifWriter.setOutput(outputStream);
         gifWriter.prepareWriteSequence(null);
     }
 
     /**
-     * Menulis satu frame ke sequence GIF dengan delay yang diberikan.
+     * Write a frame to the GIF sequence
      * 
-     * @param img           BufferedImage frame yang akan ditulis
-     * @param frameDelayMS  Delay frame dalam milidetik
-     * @throws IOException  Jika terjadi error penulisan
+     * @param img the image to write
+     * @param frameDelayMs delay in milliseconds
+     * @throws IOException if an error occurs during writing
      */
-    public void writeToSequence(BufferedImage img, int frameDelayMS) throws IOException {
-        // Perbarui metadata untuk frame ini
+    public void writeToSequence(BufferedImage img, int frameDelayMs) throws IOException {
+        // Prepare metadata for this frame
         String metaFormatName = imageMetaData.getNativeMetadataFormatName();
         IIOMetadataNode root = (IIOMetadataNode) imageMetaData.getAsTree(metaFormatName);
-        IIOMetadataNode gceNode = getNode(root, "GraphicControlExtension");
-        gceNode.setAttribute("delayTime", Integer.toString(frameDelayMS / 10));
-        imageMetaData.setFromTree(metaFormatName, root);
 
-        // Tulis frame ke sequence
-        IIOImage frameImage = new IIOImage(img, null, imageMetaData);
-        gifWriter.writeToSequence(frameImage, imageWriteParam);
+        // Set frame delay
+        IIOMetadataNode graphicsControlExtensionNode = getNode(root, "GraphicControlExtension");
+        graphicsControlExtensionNode.setAttribute("disposalMethod", "none");
+        graphicsControlExtensionNode.setAttribute("userInputFlag", "FALSE");
+        graphicsControlExtensionNode.setAttribute("transparentColorFlag", "FALSE");
+        graphicsControlExtensionNode.setAttribute("delayTime", Integer.toString(frameDelayMs / 10));
+        graphicsControlExtensionNode.setAttribute("transparentColorIndex", "0");
+
+        // Set loop parameters
+        IIOMetadataNode appExtensionsNode = getNode(root, "ApplicationExtensions");
+        IIOMetadataNode child = new IIOMetadataNode("ApplicationExtension");
+        child.setAttribute("applicationID", "NETSCAPE");
+        child.setAttribute("authenticationCode", "2.0");
+
+        int loop = true ? 0 : 1; // Loop forever
+        child.setUserObject(new byte[]{0x1, (byte)(loop & 0xFF), (byte)((loop >> 8) & 0xFF)});
+        appExtensionsNode.appendChild(child);
+        
+        imageMetaData.setFromTree(metaFormatName, root);
+        
+        // Write frame
+        gifWriter.writeToSequence(new IIOImage(img, null, imageMetaData), imageWriteParam);
     }
 
     /**
-     * Menutup sequence GIF.
+     * Close the GIF writer
      * 
-     * @throws IOException jika terjadi error saat menutup writer
+     * @throws IOException if an error occurs during closing
      */
     public void close() throws IOException {
         gifWriter.endWriteSequence();
     }
 
     /**
-     * Mengembalikan ImageWriter yang mendukung format GIF.
+     * Get a GIF ImageWriter
      * 
-     * @return ImageWriter untuk GIF
-     * @throws IOException Jika tidak ditemukan writer yang mendukung GIF
+     * @return an ImageWriter for GIF format
+     * @throws IOException if no GIF ImageWriter is found
      */
     private static ImageWriter getWriter() throws IOException {
         Iterator<ImageWriter> iter = ImageIO.getImageWritersBySuffix("gif");
@@ -108,12 +96,11 @@ public class GifSequenceWriter {
     }
 
     /**
-     * Mengembalikan node metadata dengan nama tertentu dari root node. Jika tidak
-     * ada, node akan dibuat dan ditambahkan ke root.
+     * Get a node from the metadata node tree
      * 
-     * @param rootNode root node metadata
-     * @param nodeName nama node yang dicari
-     * @return node metadata yang ditemukan atau dibuat baru
+     * @param rootNode the root node of the metadata
+     * @param nodeName the name of the node to find or create
+     * @return the found or created node
      */
     private static IIOMetadataNode getNode(IIOMetadataNode rootNode, String nodeName) {
         int nNodes = rootNode.getLength();
