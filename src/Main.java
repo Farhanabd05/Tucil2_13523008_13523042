@@ -17,7 +17,7 @@ public class Main {
             // Create QuadTree and build it first (before generating GIF frames)
             QuadTree quadTree = new QuadTree(rgbMatrix, parser.getErrorMetric(), parser.getThreshold(), parser.getMinBlockSize());
             quadTree.buildTree();
-             
+            
             long endTime = System.currentTimeMillis();
             long elapsedTime = endTime - startTime;
             
@@ -30,6 +30,7 @@ public class Main {
                 saveGifEfficiently(quadTree, parser.getGifPath(), 500); // 500ms delay between frames
                 System.out.println("[INFO] GIF visualisasi proses kompresi tersimpan di: " + parser.getGifPath());
             }
+
 
         } catch (IOException e) {
             System.err.println("[ERROR] Terjadi kesalahan saat membaca file gambar: " + e.getMessage());
@@ -48,8 +49,13 @@ public class Main {
         return copy;
     }
 
-    /**
-     * Menyimpan rangkaian frame sebagai GIF dengan delay tertentu
+        /**
+     * Menyimpan GIF secara incremental dengan menulis frame langsung ke output.
+     * Metode ini menghindari penampungan seluruh frame dalam memori.
+     *
+     * @param quadTree QuadTree yang sudah dibangun dan berisi gambar asli serta struktur kompresi
+     * @param path     Path output GIF
+     * @param frameDelay Delay antar frame dalam milidetik
      */
 /**
  * Menyimpan rangkaian frame sebagai GIF dengan delay tertentu
@@ -92,5 +98,4 @@ public static void saveGifEfficiently(QuadTree quadTree, String gifPath, int fra
         e.printStackTrace();
     }
 }
-
 }
