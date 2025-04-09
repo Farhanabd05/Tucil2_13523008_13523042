@@ -59,7 +59,11 @@ public class QuadTreeNode {
                 cnt++;
             }
         }
-        this.averageColor = new Pixel(totalR / cnt, totalG / cnt, totalB / cnt);
+        if (cnt > 0) {
+            this.averageColor = new Pixel(totalR / cnt, totalG / cnt, totalB / cnt);
+        } else {
+            this.averageColor = new Pixel(0, 0, 0);
+        }
     }
 
     /*
