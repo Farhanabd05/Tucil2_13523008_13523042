@@ -139,31 +139,37 @@ public class OutputHandler {
         return bufferedImage;
     }
 
-    /**
-     * Versi alternatif untuk menulis gambar ke file.
-     */
-    public static void writeImage2(RGBMatrix rgbMatrix, String outputPath) throws IOException {
-        int width = rgbMatrix.getWidth();
-        int height = rgbMatrix.getHeight();
+    public static void writeImage2(BufferedImage image, String outputPath, File inputFile, long executionTime) throws IOException {
+        int width = image.getWidth();
+        int height = image.getHeight();
 
-        BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-        Pixel[] pixels = rgbMatrix.getPixels();
-        int[] rgbArray = new int[pixels.length];
-        for (int i = 0; i < pixels.length; i++) {
-            rgbArray[i] = pixels[i].getRGB();
-        }
-        bufferedImage.setRGB(0, 0, width, height, rgbArray, 0, width);
+        // Tentukan format gambar berdasarkan ekstensi outputPath
         String format = getFormatFromPath(outputPath);
         if (format == null) {
             System.err.println("ERROR: Format gambar tidak dikenali.");
             return;
         }
+
         try (ImageOutputStream ios = ImageIO.createImageOutputStream(new File(outputPath))) {
-            ImageIO.write(bufferedImage, format, ios);
-        }
-        catch (IOException e) {
+            ImageIO.write(image, format, ios);
+        } catch (IOException e) {
             System.err.println("ERROR: Gagal menyimpan gambar ke " + outputPath + ": " + e.getMessage());
             e.printStackTrace();
         }
+
+        // Hitung ukuran file asli dan file terkompresi
+        long originalSize = inputFile.length();
+        long compressedSize = new File(outputPath).length();
+
+        // Hitung persentase kompresi
+        double compressionPercentage = (1.0 - (double) compressedSize / originalSize) * 100;
+
+        DecimalFormat df = new DecimalFormat("#.##");
+        System.out.println("\n--- Compression Results ---");
+        System.out.println("Execution time: " + df.format(executionTime / 1000.0) + " seconds");
+        System.out.println("Original image size: " + originalSize + " bytes");
+        System.out.println("Compressed image size: " + compressedSize + " bytes");
+        System.out.println("Compression percentage: " + df.format(compressionPercentage) + "%");
     }
+
 }

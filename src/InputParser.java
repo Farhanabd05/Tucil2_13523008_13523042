@@ -13,7 +13,9 @@ public class InputParser {
     private int minBlockSize;
     private File inputFile;
     private String gifPath;
-
+    private double targetCompression;
+    private boolean isTargetCompressionSet = false;
+    private String outputFormat;
     public InputParser() {}
 
     public void parseInput() throws IOException {
@@ -45,7 +47,7 @@ public class InputParser {
             CLIUtils.printSectionHeader("STEP 2: SET OUTPUT LOCATION");
             System.out.print(CLIUtils.BOLD + "Enter path for compressed image: " + CLIUtils.RESET);
             this.outputPath = scanner.nextLine();
-            
+            this.outputFormat = outputPath.substring(outputPath.lastIndexOf(".") + 1);
             // Convert image to RGB matrix
             CLIUtils.printInfo("Converting image to RGB matrix...");
             this.rgbMatrix = new RGBMatrix(width, height);
@@ -85,6 +87,20 @@ public class InputParser {
             System.out.print(CLIUtils.BOLD + "Enter path for GIF animation (leave empty to skip): " + CLIUtils.RESET);
             this.gifPath = scanner.nextLine();
             
+            // Target compression
+            CLIUtils.printSectionHeader("STEP 5: TARGET COMPRESSION");
+            System.out.print(CLIUtils.BOLD + "Enter target compression ratio (e.g., 0.8): " + CLIUtils.RESET);
+            this.targetCompression = scanner.nextDouble();
+            if (this.targetCompression < 0 || this.targetCompression > 1) {
+                CLIUtils.printError("Invalid target compression ratio. Please enter a value between 0 and 1.");
+                throw new IOException("Invalid target compression ratio");
+            }
+
+            if (this.targetCompression > 0) {
+                this.isTargetCompressionSet = true;
+            }
+            
+            // Display summary
             CLIUtils.printSectionHeader("READY TO COMPRESS");
             CLIUtils.printInfo("Image: " + inputFile.getName() + " (" + width + "×" + height + ")");
             CLIUtils.printInfo("Error metric: " + errorMetric.getName());
@@ -126,4 +142,7 @@ public class InputParser {
     public int getMinBlockSize() { return minBlockSize; }
     public File getInputFile() { return inputFile; }
     public String getGifPath() { return gifPath; }
+    public double getTargetCompression() { return targetCompression; }
+    public boolean isTargetCompressionSet() { return isTargetCompressionSet; }
+    public String getOutputImageFormat() { return outputFormat; }
 }

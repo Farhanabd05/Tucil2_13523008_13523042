@@ -13,22 +13,42 @@ public class Main {
             System.out.println("[DEBUG] Nilai RGB sample di (0,0): " + rgbMatrix.getPixel(0, 0));
 
             long startTime = System.currentTimeMillis();
-            
-            // Create QuadTree and build it first (before generating GIF frames)
-            QuadTree quadTree = new QuadTree(rgbMatrix, parser.getErrorMetric(), parser.getThreshold(), parser.getMinBlockSize());
-            quadTree.buildTree();
-            
-            long endTime = System.currentTimeMillis();
-            long elapsedTime = endTime - startTime;
-            
-            // Save the output image
-            OutputHandler.writeImage(quadTree, parser.getOutputPath(), parser.getInputFile(), elapsedTime);
-            System.out.println("[DEBUG] Konversi matriks RGB ke gambar selesai.");
+            if (!parser.isTargetCompressionSet()) {
+                // Create QuadTree and build it first (before generating GIF frames)
+                QuadTree quadTree = new QuadTree(rgbMatrix, parser.getErrorMetric(), parser.getThreshold(), parser.getMinBlockSize());
+                quadTree.buildTree();
+                
+                long endTime = System.currentTimeMillis();
+                long elapsedTime = endTime - startTime;
+                
+                // Save the output image
+                OutputHandler.writeImage(quadTree, parser.getOutputPath(), parser.getInputFile(), elapsedTime);
+                System.out.println("[DEBUG] Konversi matriks RGB ke gambar selesai.");
+    
+                // Save GIF with proper frame delay
+                if (!parser.getGifPath().isEmpty()) {
+                    saveGifEfficiently(quadTree, parser.getGifPath(), 500); // 500ms delay between frames
+                    System.out.println("[INFO] GIF visualisasi proses kompresi tersimpan di: " + parser.getGifPath());
+                }
+            }
+            else {
+                // Save GIF with proper frame delay
+                // Menggunakan CompressionController untuk mendapatkan gambar terkompresi dengan target kompresi
+                BufferedImage compressedImage = CompressionController.compressWithTarget(
+                    rgbMatrix,
+                    parser.getErrorMetric(),
+                    parser.getMinBlockSize(),
+                    parser.getTargetCompression(),
+                    parser.getOutputImageFormat()  // didapatkan dari ekstensi outputPath
+                );
+                
+                long endTime2 = System.currentTimeMillis();
+                long elapsedTime2 = endTime2 - startTime;
+                
+                // Tulis hasil kompresi ke file output
+                OutputHandler.writeImage2(compressedImage, parser.getOutputPath(), parser.getInputFile(), elapsedTime2);
+                System.out.println("[DEBUG] Gambar terkompresi telah disimpan.");
 
-            // Save GIF with proper frame delay
-            if (!parser.getGifPath().isEmpty()) {
-                saveGifEfficiently(quadTree, parser.getGifPath(), 500); // 500ms delay between frames
-                System.out.println("[INFO] GIF visualisasi proses kompresi tersimpan di: " + parser.getGifPath());
             }
 
 
@@ -70,12 +90,12 @@ public static void saveGifEfficiently(QuadTree quadTree, String gifPath, int fra
         int frameCount = Math.min(maxDepth + 1, 15);
         double depthStep = maxDepth / (double)(frameCount - 1);
 
-        // Tuliskan frame awal (gambar asli)
-        BufferedImage originalFrame = OutputHandler.convertToBufferedImage(quadTree.getRGBMatrix());
-        efficientWriter.writeFrame(originalFrame, frameDelay);
+        // // Tuliskan frame awal (gambar asli)
+        // BufferedImage originalFrame = OutputHandler.convertToBufferedImage(quadTree.getRGBMatrix());
+        // efficientWriter.writeFrame(originalFrame, frameDelay);
 
         // Generate dan tulis frame secara iteratif tanpa menyimpan semua frame sekaligus
-        for (int i = 1; i < frameCount; i++) {
+        for (int i = 0; i < frameCount; i++) {
             int depth = (int)Math.round(i * depthStep);
             // Misalnya, Anda memiliki metode untuk membuat RGBMatrix untuk frame pada depth tertentu.
             // Pastikan metode ini menghasilkan objek baru sehingga memori sebelumnya bisa dilepaskan.
