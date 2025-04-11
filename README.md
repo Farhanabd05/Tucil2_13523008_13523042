@@ -98,6 +98,11 @@ cd bin
 java Main
 ```
 
+## Penjelasan Asumsi
+1. Dalam implementasi kelas SSIMErrorMetric, terdapat beberapa asumsi yang disamakan untuk memastikan perhitungan SSIM berjalan dengan konsisten. Pertama, perhitungan SSIM dilakukan secara terpisah untuk setiap saluran warna (R, G, dan B), kemudian dikombinasikan dengan bobot tetap (W_R, W_G, W_B) untuk mendapatkan nilai akhir. Kedua, rata-rata warna dalam blok gambar dihitung dengan menjumlahkan semua nilai warna pada piksel dalam area yang ditentukan, lalu dibagi dengan jumlah piksel yang dihitung, dengan asumsi bahwa blok tersebut tidak kosong. Jika jumlah piksel dalam blok adalah nol, maka rata-rata warna akan dikembalikan sebagai hitam (0, 0, 0). Ketiga, dalam perhitungan variansi dan standar deviasi, asumsi bahwa jumlah piksel dalam blok minimal satu dijaga dengan pengecekan count == 0, yang akan mengembalikan SSIM maksimal (1.0) jika tidak ada piksel yang valid untuk dihitung. Keempat, dalam formula SSIM, konstanta C1 dan C2 ditetapkan berdasarkan nilai maksimum piksel 255 untuk mencegah pembagian oleh nol serta menjaga stabilitas numerik dalam perhitungan. Kelima, fungsi getChannelValue mengasumsikan bahwa indeks kanal selalu valid (0 untuk merah, 1 untuk hijau, dan 2 untuk biru), sehingga nilai kanal diperoleh tanpa pengecekan tambahan di luar batas yang sudah ditentukan. Dengan asumsi-asumsi ini, implementasi tetap sederhana dan efisien dalam menghitung SSIM untuk blok gambar tertentu.
+
+2. Pada target compression percentage menggunakan metode SSIM karena SSIM yang paling stabil threshold (0 - 1)
+
 ## Penulis
 | **NIM**  | **Nama Anggota**               |
 | -------- | ------------------------------ |
