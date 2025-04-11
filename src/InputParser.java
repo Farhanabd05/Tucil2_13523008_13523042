@@ -34,6 +34,14 @@ public class InputParser {
             
             // Load and validate the image
             this.inputFile = new File(inputFilePath);
+
+            // Periksa format file
+            String fileExtension = getFileExtension(inputFile);
+            if (!fileExtension.equalsIgnoreCase("jpg") && !fileExtension.equalsIgnoreCase("jpeg") && !fileExtension.equalsIgnoreCase("png")) {
+                CLIUtils.printError("Format file tidak didukung. Hanya JPG, JPEG, dan PNG yang diperbolehkan.");
+                throw new IOException("Unsupported file format");
+            }
+            
             BufferedImage image = ImageIO.read(inputFile);
             if (image == null) {
                 CLIUtils.printError("Failed to load image. Please ensure the file exists and is a valid image format.");
@@ -49,8 +57,13 @@ public class InputParser {
             System.out.println(CLIUtils.BOLD + "Enter path for compressed image:" + CLIUtils.RESET);
             System.out.print(CLIUtils.GREEN + ">> " + CLIUtils.RESET);
             this.outputPath = scanner.nextLine();
+
+            // cek jika output format tidak sama dengan input format throw error
             this.outputFormat = outputPath.substring(outputPath.lastIndexOf(".") + 1);
-            
+            if (!outputFormat.equalsIgnoreCase(getFileExtension(inputFile))) {
+                CLIUtils.printError("Format output tidak sama dengan format input. Silakan gunakan format yang sama.");
+                throw new IOException("Output format mismatch");
+            }
             // Convert image to RGB matrix with progress bar
             CLIUtils.printInfo("Converting image to RGB matrix...");
             this.rgbMatrix = new RGBMatrix(width, height);
@@ -291,4 +304,14 @@ public class InputParser {
     public double getTargetCompression() { return targetCompression; }
     public boolean isTargetCompressionSet() { return isTargetCompressionSet; }
     public String getOutputImageFormat() { return outputFormat; }
+    // Fungsi untuk mendapatkan ekstensi file
+    private String getFileExtension(File file) {
+        String fileName = file.getName();
+        int extensionIndex = fileName.lastIndexOf(".");
+        if (extensionIndex > 0) {
+            return fileName.substring(extensionIndex + 1).toLowerCase();
+        } else {
+            return "";
+        }
+    }
 }
