@@ -30,6 +30,23 @@ Selain mengompresi gambar, program ini juga mendukung pembuatan **visualisasi GI
 ## Struktur Program
 ```
 ├── README.md
+├── bin
+│   ├── ErrorMetrics.class
+│   ├── InputParser.class
+│   ├── OutputHandler.class
+│   ├── Main.class
+│   ├── Quadtree.class
+│   ├── QuadtreeNode.class
+│   ├── MADErrorMetric.class
+│   ├── SSIMErrorMetric.class
+│   ├── MaxPixelDifferenceErrorMetric.class
+│   ├── EntropyErrorMetric.class
+│   ├── Pixel.class
+│   ├── RGBMatrix.class
+│   ├── GifSequenceWriter.class
+│   ├── CompressionController.class
+│   ├── CompressedImage.class
+│   └── VarianceErrorMetric.class
 ├── doc
 │   └── Tucil2_13523042_13523008.pdf
 ├── src
@@ -46,8 +63,8 @@ Selain mengompresi gambar, program ini juga mendukung pembuatan **visualisasi GI
 │   ├── Pixel.java
 │   ├── RGBMatrix.java
 │   ├── GifSequenceWriter.java
-│   ├── CompressionController.java.java
-│   ├── CompressedImage.java.java
+│   ├── CompressionController.java
+│   ├── CompressedImage.java
 │   └── VarianceErrorMetric.java
 └── test
     ├── sol
@@ -78,14 +95,15 @@ javac -d bin src/*.java
 ## Cara Penggunaan
 
 ```bash
+cd bin
 java -cp bin Main
 ```
 
 ## Penulis
 | **NIM**  | **Nama Anggota**               |
 | -------- | ------------------------------ |
-| 13523042 | Varel Tiara                    |
-| 13523008 | Abdullah Farhan                |
+| 13523008 | Varel Tiara                    |
+| 13523042 | Abdullah Farhan                |
 
 ## Referensi
 Munir, Rinaldi. 2025. "Algoritma Divide and Conquer (Bagian 1)" (https://informatika.stei.itb.ac.id/~rinaldi.munir/Stmik/2024-2025/07-Algoritma-Divide-and-Conquer-(2025)-Bagian1.pdf, diakses 8 April 2025)  
