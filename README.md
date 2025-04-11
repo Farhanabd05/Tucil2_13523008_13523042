@@ -93,10 +93,9 @@ javac -d bin src/*.java
 ```
 
 ## Cara Penggunaan
-
 ```bash
 cd bin
-java -cp bin Main
+java Main
 ```
 
 ## Penulis
@@ -106,7 +105,7 @@ java -cp bin Main
 | 13523042 | Abdullah Farhan                |
 
 ## Referensi
-Munir, Rinaldi. 2025. "Algoritma Divide and Conquer (Bagian 1)" (https://informatika.stei.itb.ac.id/~rinaldi.munir/Stmik/2024-2025/07-Algoritma-Divide-and-Conquer-(2025)-Bagian1.pdf, diakses 8 April 2025)  
-Munir, Rinaldi. 2025. "Algoritma Divide and Conquer (Bagian 2)" (https://informatika.stei.itb.ac.id/~rinaldi.munir/Stmik/2024-2025/05-Algoritma-Greedy-(2025)-Bag2.pdf, diakses 8 April 2025)  
-Munir, Rinaldi. 2025. "Algoritma Divide and Conquer (Bagian 3)" (https://informatika.stei.itb.ac.id/~rinaldi.munir/Stmik/2024-2025/09-Algoritma-Divide-and-Conquer-(2025)-Bagian3.pdf, diakses 8 April 2025)  
-Munir, Rinaldi. 2025. "Algoritma Divide and Conquer (Bagian 4)" (https://informatika.stei.itb.ac.id/~rinaldi.munir/Stmik/2024-2025/10-Algoritma-Divide-and-Conquer-(2025)-Bagian4.pdf, diakses 8 April 2025)
+Munir, Rinaldi. 2025. “Algoritma Divide and Conquer (Bagian 1)” (https://informatika.stei.itb.ac.id/~rinaldi.munir/Stmik/2024-2025/07-Algoritma-Divide-and-Conquer-(2025)-Bagian1.pdf) 
+Munir, Rinaldi. 2025. “Algoritma Divide and Conquer (Bagian 2)” (https://informatika.stei.itb.ac.id/~rinaldi.munir/Stmik/2024-2025/08-Algoritma-Divide-and-Conquer-(2025)-Bagian2.pdf) 
+Munir, Rinaldi. 2025. “Algoritma Divide and Conquer (Bagian 3)” (https://informatika.stei.itb.ac.id/~rinaldi.munir/Stmik/2024-2025/09-Algoritma-Divide-and-Conquer-(2025)-Bagian3.pdf) 
+Munir, Rinaldi. 2025. “Algoritma Divide and Conquer (Bagian 4)” (https://informatika.stei.itb.ac.id/~rinaldi.munir/Stmik/2024-2025/10-Algoritma-Divide-and-Conquer-(2025)-Bagian4.pdf)
