@@ -1,7 +1,3 @@
-
-/**
- * Utility class for console output styling and effects
- */
 public class CLIUtils {
     // ANSI color codes
     public static final String RESET = "\u001B[0m";
@@ -28,17 +24,11 @@ public class CLIUtils {
     public static final String BOLD = "\u001B[1m";
     public static final String UNDERLINE = "\u001B[4m";
     
-    /**
-     * Clears the console screen
-     */
     public static void clearScreen() {
         System.out.print("\033[H\033[2J");
         System.out.flush();
     }
     
-    /**
-     * Print program logo
-     */
     public static void printLogo() {
         System.out.println(CYAN + BOLD);
         System.out.println(" █████╗ ██╗   ██╗ █████╗ ██████╗ ████████╗██████╗ ███████╗███████╗");
@@ -56,9 +46,6 @@ public class CLIUtils {
         System.out.println();
     }
     
-    /**
-     * Print section header
-     */
     public static void printSectionHeader(String title) {
         System.out.println();
         System.out.println(BOLD + BLUE + "┌─────────────────────────────────────────────┐" + RESET);
@@ -66,10 +53,7 @@ public class CLIUtils {
                 " ".repeat(Math.max(0, 41 - title.length())) + BLUE + "│" + RESET);
         System.out.println(BOLD + BLUE + "└─────────────────────────────────────────────┘" + RESET);
     }
-    
-    /**
-     * Print a progress bar
-     */
+
     public static void printProgressBar(int percent) {
         final int width = 50; // Progress bar width
         int completed = (int)((double)percent / 100 * width);
@@ -85,37 +69,22 @@ public class CLIUtils {
         System.out.print("] " + percent + "%");
     }
     
-    /**
-     * Print a success message
-     */
     public static void printSuccess(String message) {
         System.out.println(GREEN + "✓ " + message + RESET);
     }
     
-    /**
-     * Print an error message
-     */
     public static void printError(String message) {
         System.out.println(RED + "✗ " + message + RESET);
     }
-    
-    /**
-     * Print an info message
-     */
+
     public static void printInfo(String message) {
         System.out.println(BLUE + "ℹ " + message + RESET);
     }
     
-    /**
-     * Print a warning message
-     */
     public static void printWarning(String message) {
         System.out.println(YELLOW + "⚠ " + message + RESET);
     }
     
-    /**
-     * Simulate loading animation
-     */
     public static void simulateLoading(String message, int durationMs) {
         String[] frames = {"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"};
         long startTime = System.currentTimeMillis();

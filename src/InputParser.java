@@ -20,18 +20,15 @@ public class InputParser {
 
     public void parseInput() throws IOException {
         try (Scanner scanner = new Scanner(System.in)) {
-            // Clear screen and show program logo
             CLIUtils.clearScreen();
             CLIUtils.printLogo();
             
-            // Input file selection
             CLIUtils.printSectionHeader("STEP 1: SELECT INPUT IMAGE");
             System.out.print(CLIUtils.BOLD + "Enter path to image file: " + CLIUtils.RESET);
             String inputFilePath = scanner.nextLine();
             
             CLIUtils.simulateLoading("Loading image...", 1500);
             
-            // Load image
             this.inputFile = new File(inputFilePath);
             BufferedImage image = ImageIO.read(inputFile);
             if (image == null) {
@@ -43,16 +40,13 @@ public class InputParser {
             this.height = image.getHeight();
             CLIUtils.printSuccess("Image loaded successfully: " + width + "×" + height + " pixels");
             
-            // Output file selection
             CLIUtils.printSectionHeader("STEP 2: SET OUTPUT LOCATION");
             System.out.print(CLIUtils.BOLD + "Enter path for compressed image: " + CLIUtils.RESET);
             this.outputPath = scanner.nextLine();
             this.outputFormat = outputPath.substring(outputPath.lastIndexOf(".") + 1);
-            // Convert image to RGB matrix
             CLIUtils.printInfo("Converting image to RGB matrix...");
             this.rgbMatrix = new RGBMatrix(width, height);
             
-            // Show progress bar for conversion
             int[] rgbArray = image.getRGB(0, 0, width, height, null, 0, width);
             int totalPixels = rgbArray.length;
             for (int i = 0; i < rgbArray.length; i++) {
@@ -66,7 +60,6 @@ public class InputParser {
             System.out.println();
             CLIUtils.printSuccess("Image converted to RGB matrix");
             
-            // Target compression
             CLIUtils.printSectionHeader("STEP 3: TARGET COMPRESSION");
             System.out.print(CLIUtils.BOLD + "Enter target compression ratio (0 - 1) jika 0 maka kembali ke default: " + CLIUtils.RESET);
             this.targetCompression = scanner.nextDouble();
@@ -80,7 +73,6 @@ public class InputParser {
             }
             CLIUtils.printSuccess("Target compression ratio set to " + this.targetCompression);
             
-            // Error metric selection
             CLIUtils.printSectionHeader("STEP 4: COMPRESSION PARAMETERS");
             displayErrorMetrics();
             int errorMetricChoice = scanner.nextInt();
@@ -88,24 +80,23 @@ public class InputParser {
             CLIUtils.printSuccess("Selected error metric: " + errorMetric.getName());
 
             if (!this.isTargetCompressionSet) {
-                // Error threshold
                 System.out.print(CLIUtils.BOLD + "\nEnter error threshold value: " + CLIUtils.RESET);
                 threshold = scanner.nextDouble();
+
+                System.out.print(CLIUtils.BOLD + "\nEnter minimum block size (e.g., 4): " + CLIUtils.RESET);
+                minBlockSize = scanner.nextInt();
+                scanner.nextLine();
+            } else {
+                scanner.nextLine();
             }
 
-            // Minimum block size
-            System.out.print(CLIUtils.BOLD + "\nEnter minimum block size (e.g., 4): " + CLIUtils.RESET);
-            minBlockSize = scanner.nextInt();
-            scanner.nextLine(); // Consume newline
-            
-            // GIF path
             CLIUtils.printSectionHeader("STEP 5: GIF VISUALIZATION");
-
+            System.out.print(CLIUtils.BOLD + "Enter path for GIF animation (leave empty to skip): " + CLIUtils.RESET);
+            this.gifPath = scanner.nextLine();
 
             System.out.print(CLIUtils.BOLD + "Enter path for GIF animation (leave empty to skip): " + CLIUtils.RESET);
             this.gifPath = scanner.nextLine();
             
-            // Display summary
             CLIUtils.printSectionHeader("READY TO COMPRESS");
             CLIUtils.printInfo("Image: " + inputFile.getName() + " (" + width + "×" + height + ")");
             CLIUtils.printInfo("Error metric: " + errorMetric.getName());
@@ -137,7 +128,6 @@ public class InputParser {
         System.out.print(CLIUtils.BOLD + "\nSelect error metric (1-4): " + CLIUtils.RESET);
     }
     
-    // Getters remain unchanged
     public int getHeight() { return height; }
     public int getWidth() { return width; }
     public RGBMatrix getRGBMatrix() { return rgbMatrix; }

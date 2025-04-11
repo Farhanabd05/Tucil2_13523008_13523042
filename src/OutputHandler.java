@@ -1,5 +1,4 @@
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -7,23 +6,13 @@ import javax.imageio.ImageIO;
 import javax.imageio.stream.ImageOutputStream;
 
 public class OutputHandler {
-    /**
-     * Mengubah RGBMatrix menjadi BufferedImage dan menyimpannya ke file output.
-     *
-     * @param quadTree   QuadTree yang berisi data gambar dan struktur kompresi
-     * @param outputPath Path file output (contoh: "output.png")
-     * @param inputFile  File gambar asli
-     * @param executionTime Waktu eksekusi kompresi dalam milidetik
-     */
     public static void writeImage(QuadTree quadTree, String outputPath, File inputFile, long executionTime) throws IOException {
         RGBMatrix rgbMatrix = quadTree.getRGBMatrix();
         int width = rgbMatrix.getWidth();
         int height = rgbMatrix.getHeight();
 
-        // Membuat BufferedImage dengan tipe RGB
         BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 
-        // Mengisi BufferedImage dengan data RGB dari RGBMatrix
         Pixel[] pixels = rgbMatrix.getPixels();
         int[] rgbArray = new int[pixels.length];
         for (int i = 0; i < pixels.length; i++) {
@@ -31,7 +20,6 @@ public class OutputHandler {
         }
         bufferedImage.setRGB(0, 0, width, height, rgbArray, 0, width);
 
-        // Menentukan format gambar berdasarkan ekstensi file
         String format = getFormatFromPath(outputPath);
         if (format == null) {
             System.err.println("ERROR: Format gambar tidak dikenali.");
@@ -45,18 +33,15 @@ public class OutputHandler {
             e.printStackTrace();
         }
 
-        // Menghitung ukuran file
         long originalSize = inputFile.length();
         long compressedSize = new File(outputPath).length();
         
-        // Menghitung persentase kompresi
         double compressionPercentage = (1.0 - (double) compressedSize / originalSize) * 100;        
 
         int nodeCount = quadTree.getNodeCount();
         int maxDepth = quadTree.getMaxDepth();
         DecimalFormat df = new DecimalFormat("#.##");
 
-        // Menampilkan hasil kompresi dalam format tabel
         printCompressionResults(
             df.format(executionTime / 1000.0) + " seconds", 
             originalSize + " bytes", 
@@ -67,9 +52,6 @@ public class OutputHandler {
         );
     }
 
-    /**
-     * Menampilkan hasil kompresi dalam bentuk tabel.
-     */
     private static void printCompressionResults(String execTime, String origSize, String compSize, String compPerc, String nodeCount, String maxDepth) {
         String col1Title = "Parameter";
         String col2Title = "Nilai";
@@ -96,19 +78,10 @@ public class OutputHandler {
         System.out.println(bottomBorder);
     }
 
-    /**
-     * Membantu mencetak satu baris dalam tabel.
-     */
     private static void printTableRow(String param, String value, int width1, int width2) {
         System.out.printf("│ %-"+width1+"s│ %-"+width2+"s│\n", param, value);
     }
 
-    /**
-     * Mengambil format gambar dari path file, misal "png" dari "output.png".
-     *
-     * @param path Path file
-     * @return String format file atau null jika tidak ditemukan.
-     */
     private static String getFormatFromPath(String path) {
         int dotIndex = path.lastIndexOf('.');
         if (dotIndex == -1 || dotIndex == path.length() - 1) {
@@ -117,9 +90,6 @@ public class OutputHandler {
         return path.substring(dotIndex + 1);
     }
 
-    /**
-     * Mengubah RGBMatrix menjadi BufferedImage.
-     */
     public static BufferedImage convertToBufferedImage(RGBMatrix rgbMatrix) {
         int width = rgbMatrix.getWidth();
         int height = rgbMatrix.getHeight();
@@ -134,7 +104,6 @@ public class OutputHandler {
     
         bufferedImage.setRGB(0, 0, width, height, rgbArray, 0, width);
     
-        // Buang referensi ke rgbArray untuk mengurangi penggunaan memori
         rgbArray = null;
     
         return bufferedImage;
@@ -144,7 +113,6 @@ public class OutputHandler {
         int width = image.getWidth();
         int height = image.getHeight();
 
-        // Tentukan format gambar berdasarkan ekstensi outputPath
         String format = getFormatFromPath(outputPath);
         if (format == null) {
             System.err.println("ERROR: Format gambar tidak dikenali.");
