@@ -1,18 +1,16 @@
 public class SSIMErrorMetric implements ErrorMetric {
-    // Konstanta untuk stabilitas SSIM
     private static final double C1 = 6.5025;  // (0.01 * 255)^2
     private static final double C2 = 58.5225; // (0.03 * 255)^2
     
     private static final double W_R = 0.299;
     private static final double W_G = 0.587;
     private static final double W_B = 0.114;
-
+    
     public double calculateSSIMWithMonotoneBlock(RGBMatrix originalMatrix, 
     int x, int y, int width, int height, Pixel avgColor) {
         double ssimR = calculateSSIMForChannel(originalMatrix, x, y, width, height, avgColor, 0);
         double ssimG = calculateSSIMForChannel(originalMatrix, x, y, width, height, avgColor, 1);
         double ssimB = calculateSSIMForChannel(originalMatrix, x, y, width, height, avgColor, 2);
-
         return W_R * ssimR + W_G * ssimG + W_B * ssimB;
     }
 
@@ -43,20 +41,18 @@ public class SSIMErrorMetric implements ErrorMetric {
 
         return new Pixel(totalR / count, totalG / count, totalB / count);
     }
-    
     private double calculateSSIMForChannel(RGBMatrix originalMatrix, int x, int y, 
                                         int width, int height, Pixel avgColor, int channel) {
         double sumX = 0;
         double sumXSquare = 0;
         int count = 0;
         
-        // Nilai y adalah konstan (warna rata-rata dari avgColor)
         double meanY;
         if (channel == 0) {
             meanY = avgColor.getR();
         } else if (channel == 1) {
             meanY = avgColor.getG();
-        } else {
+        } else { 
             meanY = avgColor.getB();
         }
         
@@ -81,14 +77,11 @@ public class SSIMErrorMetric implements ErrorMetric {
         
         if (count == 0) return 1.0;
         
-        // Hitung statistik
         double meanX = sumX / count;
         double varianceX = (sumXSquare / count) - (meanX * meanX);
         
-        // Hitung standar deviasi
         double stdDevX = Math.sqrt(Math.max(0, varianceX));
         
-        // Hitung SSIM yang disederhanakan karena variansi Y = 0 dan covariance = 0
         double numerator = (2 * meanX * meanY + C1) * C2;
         double denominator = (meanX * meanX + meanY * meanY + C1) * (stdDevX * stdDevX + C2);
         
@@ -97,7 +90,6 @@ public class SSIMErrorMetric implements ErrorMetric {
         return numerator / denominator;
     }
     
-
     private double getChannelValue(Pixel pixel, int channel) {
         switch (channel) {
             case 0: return pixel.getR();
@@ -106,9 +98,9 @@ public class SSIMErrorMetric implements ErrorMetric {
             default: throw new IllegalArgumentException("Invalid channel index: " + channel);
         }
     }
-
+    
     @Override
     public String getName() {
         return "SSIM (Structural Similarity Index)";
     }
-  }
+}
