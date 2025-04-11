@@ -41,7 +41,6 @@ public class SSIMErrorMetric implements ErrorMetric {
 
         return new Pixel(totalR / count, totalG / count, totalB / count);
     }
-
     private double calculateSSIMForChannel(RGBMatrix originalMatrix, int x, int y, 
                                         int width, int height, Pixel avgColor, int channel) {
         double sumX = 0;
