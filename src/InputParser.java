@@ -21,7 +21,7 @@ public class InputParser {
 
     public void parseInput() throws IOException {
         try (Scanner scanner = new Scanner(System.in)) {
-            CLIUtils.clearScreen();
+            // CLIUtils.clearScreen();
             CLIUtils.printLogo();
             
             // STEP 1: Get input image path
@@ -156,7 +156,6 @@ public class InputParser {
             System.out.print(CLIUtils.GREEN + ">> " + CLIUtils.RESET);
             this.gifPath = scanner.nextLine();
             
-            CLIUtils.clearScreen();
             // Display summary and prepare for compression
             CLIUtils.printSectionHeader("READY TO COMPRESS");
             CLIUtils.printInfo("Image: " + inputFile.getName() + " (" + width + "×" + height + ")");

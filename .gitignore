@@ -89,4 +89,6 @@ nb-configuration.xml
 ##############################
 *.log
 
-/test/sol
+/test/sol/*.jpg
+/test/sol/*.png
+/test/sol/*.jpeg

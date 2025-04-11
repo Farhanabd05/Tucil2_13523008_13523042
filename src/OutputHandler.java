@@ -1,4 +1,5 @@
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -33,8 +34,10 @@ public class OutputHandler {
             e.printStackTrace();
         }
 
-        long originalSize = inputFile.length();
-        long compressedSize = new File(outputPath).length();
+        BufferedImage originalImage = ImageIO.read(inputFile);
+        BufferedImage compressedImage = ImageIO.read(new File(outputPath));
+        long originalSize = getImageSizeInBytes(originalImage, format);
+        long compressedSize = getImageSizeInBytes(compressedImage, format);
         
         double compressionPercentage = (1.0 - (double) compressedSize / originalSize) * 100;        
 
@@ -184,5 +187,18 @@ public class OutputHandler {
         System.out.println("Compressed image size: " + compressedSizeInBytes + " bytes");
         System.out.println("Compression percentage: " + compressionRate+ "%");
     }
+
+
+    public static long getImageSizeInBytes(BufferedImage image, String formatName) {
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            ImageIO.write(image, formatName, baos);
+            baos.flush();
+            return baos.toByteArray().length;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
 
 }
