@@ -3,7 +3,7 @@
 # <h2 align="center">Implementasi Divide And Conquer Pada Kompresi Gambar</h2>
 
 <p align="center">
-  <img src="test/tc/tc1_1.gif" alt="Quadtree Compression GIF" width="500"/>
+  <img src="test/sol/tc1_1.gif" alt="Quadtree Compression GIF" width="500"/>
 </p>
 
 ## Daftar Isi
@@ -80,9 +80,6 @@ javac -d bin src/*.java
 ```bash
 java -cp bin Main
 ```
-
-Anda juga dapat menonton video di bawah ini untuk mempelajari cara menggunakan program:
-[![Cara Menggunakan Program](https://img.youtube.com/vi/GmKJs3wif9k/0.jpg)](https://youtu.be/GmKJs3wif9k)
 
 ## Penulis
 | **NIM**  | **Nama Anggota**               |
