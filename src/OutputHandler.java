@@ -160,4 +160,29 @@ public class OutputHandler {
     
         return bufferedImage;
     }
+
+    public static void writeImage2(BufferedImage image, String outputPath, File inputFile, long executionTime, double compressionRate, long compressedSizeInBytes, long originalSizeInBytes) throws IOException {
+        int width = image.getWidth();
+        int height = image.getHeight();
+
+        String format = getFormatFromPath(outputPath);
+        if (format == null) {
+            System.err.println("ERROR: Format gambar tidak dikenali.");
+            return;
+        }
+
+        try (ImageOutputStream ios = ImageIO.createImageOutputStream(new File(outputPath))) {
+            ImageIO.write(image, format, ios);
+        } catch (IOException e) {
+            System.err.println("ERROR: Gagal menyimpan gambar ke " + outputPath + ": " + e.getMessage());
+            e.printStackTrace();
+        }
+        DecimalFormat df = new DecimalFormat("#.##");
+        System.out.println("\n--- Compression Results ---");
+        System.out.println("Execution time: " + df.format(executionTime / 1000.0) + " seconds");
+        System.out.println("Original image size: " + originalSizeInBytes + " bytes");
+        System.out.println("Compressed image size: " + compressedSizeInBytes + " bytes");
+        System.out.println("Compression percentage: " + compressionRate+ "%");
+    }
+
 }
