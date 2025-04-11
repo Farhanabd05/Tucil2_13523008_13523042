@@ -24,10 +24,15 @@ public class CLIUtils {
     public static final String BOLD = "\u001B[1m";
     public static final String UNDERLINE = "\u001B[4m";
     
+
     public static void clearScreen() {
-        System.out.print("\033[H\033[2J");
-        System.out.flush();
+        System.out.print("\033c");       // Reset terminal
+        System.out.print("\033[2J");     // Clear entire screen
+        System.out.print("\033[H");      // Move cursor to top-left corner
+        System.out.print("\033[3J");     // Clear scrollback buffer (supported in some terminals)
+        System.out.flush();              // Ensure all commands are sent immediately
     }
+
     
     public static void printLogo() {
         System.out.println(CYAN + BOLD);
@@ -46,13 +51,17 @@ public class CLIUtils {
         System.out.println();
     }
     
+    
+    
     public static void printSectionHeader(String title) {
+        int boxWidth = 45;
         System.out.println();
-        System.out.println(BOLD + BLUE + "┌─────────────────────────────────────────────┐" + RESET);
+        System.out.println(BOLD + BLUE + "┌" + "─".repeat(boxWidth - 2) + "┐" + RESET);
         System.out.println(BOLD + BLUE + "│ " + YELLOW + title + 
-                " ".repeat(Math.max(0, 41 - title.length())) + BLUE + "│" + RESET);
-        System.out.println(BOLD + BLUE + "└─────────────────────────────────────────────┘" + RESET);
+                " ".repeat(Math.max(0, boxWidth - title.length() - 4)) + BLUE + "│" + RESET);
+        System.out.println(BOLD + BLUE + "└" + "─".repeat(boxWidth - 2) + "┘" + RESET);
     }
+    
 
     public static void printProgressBar(int percent) {
         final int width = 50; // Progress bar width

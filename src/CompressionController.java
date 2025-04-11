@@ -174,22 +174,26 @@ public class CompressionController {
                                                 double targetCompression, String imageFormat) {
         if (targetCompression == 0) {
             double defaultThreshold = getDefaultThreshold(errorMetric);
-            BufferedImage compressedImage = compressImage(rgbMatrix, errorMetric, defaultThreshold, 8);
+            QuadTree qt = new QuadTree(rgbMatrix.copy(), errorMetric, defaultThreshold, 8);
+            qt.buildTree();
+            BufferedImage compressedImage = OutputHandler.convertToBufferedImage(qt.getRGBMatrix());
             BufferedImage originalImage = OutputHandler.convertToBufferedImage(rgbMatrix);
             long originalSize = getImageSizeInBytes(originalImage, imageFormat);
             long compressedSize = getImageSizeInBytes(compressedImage, imageFormat);
             double compRate = (1 - ((double) compressedSize / originalSize)) * 100.0;
-            return new CompressedImage(compressedImage, compRate, compressedSize, originalSize);
+            return new CompressedImage(compressedImage, compRate, compressedSize, originalSize, qt);
         }
 
         boolean useSSIM = errorMetric.getName().toLowerCase().contains("ssim");
         OptimalParameters params = findOptimalParameters(rgbMatrix, errorMetric, targetCompression, imageFormat, useSSIM);
         System.out.println("Parameter optimal ditemukan: " + params.blockSize + ", " + params.threshold);
-        BufferedImage finalCompressedImage = compressImage(rgbMatrix, errorMetric, params.threshold, (int) params.blockSize);
+        QuadTree qt = new QuadTree(rgbMatrix.copy(), errorMetric, params.threshold, (int) params.blockSize);
+        qt.buildTree();
+        BufferedImage finalCompressedImage = OutputHandler.convertToBufferedImage(qt.getRGBMatrix());
         BufferedImage originalImage = OutputHandler.convertToBufferedImage(rgbMatrix);
         long originalSize = getImageSizeInBytes(originalImage, imageFormat);
         long finalSize = getImageSizeInBytes(finalCompressedImage, imageFormat);
         double finalCompression = (1 - ((double) finalSize / originalSize)) * 100.0;
-        return new CompressedImage(finalCompressedImage, finalCompression, finalSize, originalSize);
+        return new CompressedImage(finalCompressedImage, finalCompression, finalSize, originalSize, qt);
     }
 }
