@@ -66,30 +66,9 @@ public class InputParser {
             System.out.println();
             CLIUtils.printSuccess("Image converted to RGB matrix");
             
-            // Error metric selection
-            CLIUtils.printSectionHeader("STEP 3: COMPRESSION PARAMETERS");
-            displayErrorMetrics();
-            int errorMetricChoice = scanner.nextInt();
-            errorMetric = ErrorMetricFactory.createErrorMetric(errorMetricChoice);
-            CLIUtils.printSuccess("Selected error metric: " + errorMetric.getName());
-
-            // Error threshold
-            System.out.print(CLIUtils.BOLD + "\nEnter error threshold value: " + CLIUtils.RESET);
-            threshold = scanner.nextDouble();
-
-            // Minimum block size
-            System.out.print(CLIUtils.BOLD + "\nEnter minimum block size (e.g., 4): " + CLIUtils.RESET);
-            minBlockSize = scanner.nextInt();
-            scanner.nextLine(); // Consume newline
-            
-            // GIF path
-            CLIUtils.printSectionHeader("STEP 4: GIF VISUALIZATION");
-            System.out.print(CLIUtils.BOLD + "Enter path for GIF animation (leave empty to skip): " + CLIUtils.RESET);
-            this.gifPath = scanner.nextLine();
-            
             // Target compression
-            CLIUtils.printSectionHeader("STEP 5: TARGET COMPRESSION");
-            System.out.print(CLIUtils.BOLD + "Enter target compression ratio (e.g., 0.8): " + CLIUtils.RESET);
+            CLIUtils.printSectionHeader("STEP 3: TARGET COMPRESSION");
+            System.out.print(CLIUtils.BOLD + "Enter target compression ratio (0 - 1) jika 0 maka kembali ke default: " + CLIUtils.RESET);
             this.targetCompression = scanner.nextDouble();
             if (this.targetCompression < 0 || this.targetCompression > 1) {
                 CLIUtils.printError("Invalid target compression ratio. Please enter a value between 0 and 1.");
@@ -99,6 +78,32 @@ public class InputParser {
             if (this.targetCompression > 0) {
                 this.isTargetCompressionSet = true;
             }
+            CLIUtils.printSuccess("Target compression ratio set to " + this.targetCompression);
+            
+            // Error metric selection
+            CLIUtils.printSectionHeader("STEP 4: COMPRESSION PARAMETERS");
+            displayErrorMetrics();
+            int errorMetricChoice = scanner.nextInt();
+            errorMetric = ErrorMetricFactory.createErrorMetric(errorMetricChoice);
+            CLIUtils.printSuccess("Selected error metric: " + errorMetric.getName());
+
+            if (!this.isTargetCompressionSet) {
+                // Error threshold
+                System.out.print(CLIUtils.BOLD + "\nEnter error threshold value: " + CLIUtils.RESET);
+                threshold = scanner.nextDouble();
+            }
+
+            // Minimum block size
+            System.out.print(CLIUtils.BOLD + "\nEnter minimum block size (e.g., 4): " + CLIUtils.RESET);
+            minBlockSize = scanner.nextInt();
+            scanner.nextLine(); // Consume newline
+            
+            // GIF path
+            CLIUtils.printSectionHeader("STEP 5: GIF VISUALIZATION");
+
+
+            System.out.print(CLIUtils.BOLD + "Enter path for GIF animation (leave empty to skip): " + CLIUtils.RESET);
+            this.gifPath = scanner.nextLine();
             
             // Display summary
             CLIUtils.printSectionHeader("READY TO COMPRESS");

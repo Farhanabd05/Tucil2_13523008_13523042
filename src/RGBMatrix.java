@@ -9,7 +9,6 @@ public class RGBMatrix {
         for (int i = 0; i < pixels.length; i++) {
             pixels[i] = new Pixel(0, 0, 0);
         }
-        System.out.println("RGBMatrix created with width=" + width + " and height=" + height);
     }
 
     public void setPixel(int x, int y, int pixel) {

@@ -6,6 +6,7 @@
  * threshold error dan ukuran minimum blok.
 */
 
+import java.awt.image.BufferedImage;
 public class QuadTree {
     // root node dari quadtree
     private QuadTreeNode root;
@@ -68,7 +69,7 @@ public class QuadTree {
 
         // hitung nilai rata-rata warna node ini
         node.calculateAverageColor(rgbMatrix);
-
+        
         // cek apakah blok ini perlu dibagi lagi
         if (shouldSplit(node)) {
             // bagi node menjadi 4 child
@@ -106,6 +107,47 @@ public class QuadTree {
         return error > threshold;
     }
 
+    public void buildTree(double currentThreshold, BufferedImage image) {
+        buildTreeRecursive(root, 0, currentThreshold, image);
+        applyColorToMatrix();
+    }
+    
+    private void buildTreeRecursive(QuadTreeNode node, int depth, double currentThreshold, BufferedImage image) {
+        // update kedalam maksimum
+        maxDepth = Math.max(maxDepth, depth);
+    
+        // hitung nilai rata-rata warna node ini
+        node.calculateAverageColor(rgbMatrix);
+    
+        // cek apakah blok ini perlu dibagi lagi
+        if (shouldSplit(node, currentThreshold, image)) {
+            // bagi node menjadi 4 child
+            node.split();
+    
+            // proses masing-masing child secara rekursif
+            buildTreeRecursive(node.getTopLeft(), depth + 1, currentThreshold, image);
+            buildTreeRecursive(node.getTopRight(), depth + 1, currentThreshold, image);
+            buildTreeRecursive(node.getBottomLeft(), depth + 1, currentThreshold, image);
+            buildTreeRecursive(node.getBottomRight(), depth + 1, currentThreshold, image);
+    
+            nodeCount += 4;
+        } else {
+            // jika tidak perlu dibagi lagi, aplikasikan warna rata-rata ke matriks RGB
+            applyColorRecursive(node);
+        }
+    }
+    
+    private boolean shouldSplit(QuadTreeNode node, double currentThreshold, BufferedImage image) {
+        // cek apakah ukuran blok setelah dibagi lebih kecil dari ukuran minimum blok
+        if (node.getWidth() * node.getHeight() < minBlockSize) return false;
+    
+        // hitung error untuk node ini
+        double error = errorMetric.calculateError(rgbMatrix, node.getX(), node.getY(), node.getWidth(), node.getHeight());
+    
+        // bagi jika error lebih besar dari threshold
+        return error > currentThreshold;
+    }
+    
     // menerapkan nilai warna rata-rata dari setiap leaf node ke matriks RGB
 
     private void applyColorToMatrix() {
@@ -179,6 +221,7 @@ public void applyColorsAtDepth(QuadTreeNode node, RGBMatrix matrix, int targetDe
         // Apply this node's color to all pixels in its region
         for (int y = node.getY(); y < node.getY() + node.getHeight() && y < matrix.getHeight(); y++) {
             for (int x = node.getX(); x < node.getX() + node.getWidth() && x < matrix.getWidth(); x++) {
+                if (node.getAverageColor() == null) matrix.setPixel(x, y, 0);
                 matrix.setPixel(x, y, node.getAverageColor().getRGB());
             }
         }

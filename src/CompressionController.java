@@ -4,7 +4,6 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 public class CompressionController {
-
     /**
      * Mengembalikan nilai default threshold berdasarkan jenis ErrorMetric.
      */
@@ -66,15 +65,11 @@ public class CompressionController {
      * @param imageFormat       Format gambar (misalnya "png")
      * @return                  BufferedImage hasil kompresi dengan threshold yang disesuaikan
      */
-    public static BufferedImage compressWithTarget(RGBMatrix rgbMatrix, ErrorMetric errorMetric, 
-                                                     int minBlockSize, double targetCompression,
-                                                     String imageFormat) {
-        double defaultThreshold = getDefaultThreshold(errorMetric);
-        
-        // Jika mode target kompresi dinonaktifkan, gunakan default threshold
-        if (targetCompression == 0) {
-            return compressImage(rgbMatrix, errorMetric, defaultThreshold, minBlockSize);
-        }
+    public CompressedImage compressWithTarget(RGBMatrix rgbMatrix, ErrorMetric errorMetric, 
+                                     int minBlockSize, double targetCompression,
+                                     String imageFormat) {
+
+    double defaultThreshold = getDefaultThreshold(errorMetric);
         
         // Inisialisasi batas untuk binary search
         double lowThreshold = 0.0;
@@ -96,21 +91,33 @@ public class CompressionController {
         }
         
         double bestThreshold = defaultThreshold;
-        double tolerance = 0.01;  // margin error 1%
+        double tolerance = 0.0001;  // margin error 1%
         BufferedImage compressedImage = null;
         
         // Ambil ukuran gambar asli (sebagai acuan)
         BufferedImage originalImage = OutputHandler.convertToBufferedImage(rgbMatrix);
-        long originalSize = getImageSizeInBytes(originalImage, imageFormat);
-        
+        long originalSizeInBytes = getImageSizeInBytes(originalImage, imageFormat);
+        System.out.println("[DEBUG] Original image size: " + originalSizeInBytes + " bytes");
         double currentCompression = 0;
+        boolean isEarlyStop = false;
+        int counterForSame = 0;
+        double prevCompression = 0;
         // Binary search untuk menemukan threshold terbaik
-        while ((highThreshold - lowThreshold) > tolerance) {
+        while (true) {
+            
+
             double midThreshold = (lowThreshold + highThreshold) / 2.0;
             compressedImage = compressImage(rgbMatrix, errorMetric, midThreshold, minBlockSize);
             long compressedSize = getImageSizeInBytes(compressedImage, imageFormat);
-            currentCompression = (1 - ((double) compressedSize / originalSize)) * 100.0;
-            
+            currentCompression = (1 - ((double) compressedSize / originalSizeInBytes)) * 100.0;
+
+            if (prevCompression == currentCompression) {
+                counterForSame++;
+            } else {
+                counterForSame = 0; 
+            }
+            prevCompression = currentCompression;
+            // (1 - (3830340/15933389))*100
             // Jika kompresi kurang tinggi dari target, artinya perlu mengurangi pembagian (meningkatkan threshold)
             if (currentCompression < targetCompression) {
                 lowThreshold = midThreshold;
@@ -118,11 +125,26 @@ public class CompressionController {
                 // Jika kompresi terlalu tinggi, threshold harus diturunkan
                 highThreshold = midThreshold;
             }
+            
+            // if (currentCompression < 0) {
+            //     currentCompression = 0;
+            // } else if (currentCompression > 100) {
+            //     currentCompression = 100;
+            // }
+
+            if (counterForSame >= 3 && Math.abs(currentCompression - targetCompression) <= tolerance) {
+                isEarlyStop = true;
+            }
             bestThreshold = midThreshold;
+            System.out.println("[DEBUG] Current compression: " + currentCompression + "%");
+            System.out.println("[DEBUG] Current threshold: " + bestThreshold);
+            System.out.println("[DEBUG] Current image size: " + compressedSize + " bytes");
+            if ((highThreshold - lowThreshold) <= tolerance || isEarlyStop) {
+                return new CompressedImage(compressedImage, currentCompression, compressedSize, originalSizeInBytes);
+            }
         }
         
-        // Kembalikan hasil kompresi dengan threshold terbaik yang ditemukan
-        return compressImage(rgbMatrix, errorMetric, bestThreshold, minBlockSize);
     }
+// }
 }
 

@@ -25,7 +25,6 @@ public class Main {
                 OutputHandler.writeImage(quadTree, parser.getOutputPath(), parser.getInputFile(), elapsedTime);
                 System.out.println("[DEBUG] Konversi matriks RGB ke gambar selesai.");
     
-                // Save GIF with proper frame delay
                 if (!parser.getGifPath().isEmpty()) {
                     saveGifEfficiently(quadTree, parser.getGifPath(), 500); // 500ms delay between frames
                     System.out.println("[INFO] GIF visualisasi proses kompresi tersimpan di: " + parser.getGifPath());
@@ -34,7 +33,8 @@ public class Main {
             else {
                 // Save GIF with proper frame delay
                 // Menggunakan CompressionController untuk mendapatkan gambar terkompresi dengan target kompresi
-                BufferedImage compressedImage = CompressionController.compressWithTarget(
+                CompressionController controller = new CompressionController();
+                CompressedImage compressedImage = controller.compressWithTarget(
                     rgbMatrix,
                     parser.getErrorMetric(),
                     parser.getMinBlockSize(),
@@ -46,10 +46,16 @@ public class Main {
                 long elapsedTime2 = endTime2 - startTime;
                 
                 // Tulis hasil kompresi ke file output
-                OutputHandler.writeImage2(compressedImage, parser.getOutputPath(), parser.getInputFile(), elapsedTime2);
+                BufferedImage compressedImageBuffer = compressedImage.getImage();
+                OutputHandler.writeImage2(compressedImageBuffer, parser.getOutputPath(), parser.getInputFile(), elapsedTime2, compressedImage.getCompressionRate(), compressedImage.getCompressedSizeInBytes(), compressedImage.getOriginalSizeInBytes());
                 System.out.println("[DEBUG] Gambar terkompresi telah disimpan.");
-
+                
+                // if (!parser.getGifPath().isEmpty()) {
+                //     saveGifEfficiently(quadTree, parser.getGifPath(), 500); // 500ms delay between frames
+                //     System.out.println("[INFO] GIF visualisasi proses kompresi tersimpan di: " + parser.getGifPath());
+                // }
             }
+            // Save GIF with proper frame delay
 
 
         } catch (IOException e) {

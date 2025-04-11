@@ -1,4 +1,5 @@
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -139,7 +140,7 @@ public class OutputHandler {
         return bufferedImage;
     }
 
-    public static void writeImage2(BufferedImage image, String outputPath, File inputFile, long executionTime) throws IOException {
+    public static void writeImage2(BufferedImage image, String outputPath, File inputFile, long executionTime, double compressionRate, long compressedSizeInBytes, long originalSizeInBytes) throws IOException {
         int width = image.getWidth();
         int height = image.getHeight();
 
@@ -156,20 +157,12 @@ public class OutputHandler {
             System.err.println("ERROR: Gagal menyimpan gambar ke " + outputPath + ": " + e.getMessage());
             e.printStackTrace();
         }
-
-        // Hitung ukuran file asli dan file terkompresi
-        long originalSize = inputFile.length();
-        long compressedSize = new File(outputPath).length();
-
-        // Hitung persentase kompresi
-        double compressionPercentage = (1.0 - (double) compressedSize / originalSize) * 100;
-
         DecimalFormat df = new DecimalFormat("#.##");
         System.out.println("\n--- Compression Results ---");
         System.out.println("Execution time: " + df.format(executionTime / 1000.0) + " seconds");
-        System.out.println("Original image size: " + originalSize + " bytes");
-        System.out.println("Compressed image size: " + compressedSize + " bytes");
-        System.out.println("Compression percentage: " + df.format(compressionPercentage) + "%");
+        System.out.println("Original image size: " + originalSizeInBytes + " bytes");
+        System.out.println("Compressed image size: " + compressedSizeInBytes + " bytes");
+        System.out.println("Compression percentage: " + compressionRate+ "%");
     }
 
 }

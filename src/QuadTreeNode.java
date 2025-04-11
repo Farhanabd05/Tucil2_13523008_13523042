@@ -35,7 +35,7 @@ public class QuadTreeNode {
         this.y = y;
         this.width = width;
         this.height = height;
-        this.averageColor = null;
+        this.averageColor = new Pixel(0, 0, 0);
         this.topLeft = null;
         this.topRight = null;
         this.bottomLeft = null;
